@@ -1,8 +1,22 @@
 const router = require('express').Router();
 const bankid = require('./dalBankid');
 
+router.post('/signAndCollect', async (req, res) => {
+    try {
+        const { endUserIp, personalNumber, userVisibleData } = req.body;
+
+        return res.json(
+            await bankid.signAndCollect(endUserIp, personalNumber, userVisibleData)
+        );
+    } catch (err) {
+        console.log('err', err);
+        res.json(err);
+    }
+});
+
 router.post('/auth', async (req, res) => {
     try {
+        console.log('auth');
         const { endUserIp } = req.body;
 
         return res.json(
