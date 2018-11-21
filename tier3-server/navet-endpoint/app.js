@@ -19,8 +19,8 @@ app.use(require('./components'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 https.createServer({
-    key: fs.readFileSync('server.key'),
-    cert: fs.readFileSync('server.cert'),
+    key: fs.readFileSync('../../localConfig/server.key'),
+    cert: fs.readFileSync('../../localConfig/server.cert'),
     requestCert: true,
     rejectUnauthorized: false
 }, app).listen(port, () => console.log(`Example app listening on port ${port}!`));
