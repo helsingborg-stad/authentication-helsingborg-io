@@ -4,6 +4,7 @@
   "description": "Boilerplate for the mina sider project",
   "main": "app.js",
   "scripts": {
+    "start": "nodemon -r dotenv/config app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Morgan Ottosson",
@@ -21,6 +22,7 @@
     "async": "^2.6.1",
     "await": "^0.2.6",
     "axios": "^0.18.0",
+    "dotenv": "^6.1.0",
     "easy-soap-request": "^2.3.0",
     "express": "^4.16.4",
     "fs": "0.0.1-security",
