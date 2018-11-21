@@ -1,14 +1,11 @@
 const redis = require('redis');
+const axios = require('axios');
+const https = require('https');
 const client = redis.createClient();
 
 client.on('error', (err) => {
     console.log('Error ' + err);
 });
-
-const axios = require('axios');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
 
 exports.getPerson = (body) => {
     return new Promise((resolve, reject) => {
@@ -34,8 +31,8 @@ exports.getPerson = (body) => {
 function fetchAndSavePerson (body, resolve, reject) {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false,
-        key: fs.readFileSync(path.join(__dirname, '../../server.key'), 'utf8'),
-        cert: fs.readFileSync(path.join(__dirname, '../../server.cert'), 'utf8')
+        key: process.env.SERVERKEY,
+        cert: process.env.SERVERCERT
     });
     axios({
         method: 'get',
