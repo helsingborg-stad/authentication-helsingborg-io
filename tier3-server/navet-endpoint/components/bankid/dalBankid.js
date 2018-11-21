@@ -23,16 +23,9 @@ const client = axios.create({
 
 const getErrorDetails = (statusCode, message, httpStatus) => {
     return {
-        status: httpStatus,
         bankidErrorCode: statusCode,
-        message: message
-    };
-};
-
-const getResponseData = (response) => {
-    return {
-        status: response.status,
-        data: response.data
+        message: message,
+        status: httpStatus
     };
 };
 
@@ -40,9 +33,10 @@ const call = async (path, payload) => {
     try {
         const response = await client.post(apiUrl + path, payload);
 
-        var data = getResponseData(response);
-
-        return data;
+        return {
+            status: response.status,
+            data: response.data
+        };
     } catch (error) {
         if (error.response) {
             // The request was made and the server responded with a status code
@@ -67,7 +61,7 @@ const call = async (path, payload) => {
 exports.auth = async (endUserIp) => {
     try {
         if (!endUserIp) {
-            return callback(getErrorDetails('invalidParameters', 'Missing required arguments: endUserIp.'));
+            return getErrorDetails('invalidParameters', 'Missing required arguments: endUserIp.', 400);
         }
 
         const response = await call('/auth', {
