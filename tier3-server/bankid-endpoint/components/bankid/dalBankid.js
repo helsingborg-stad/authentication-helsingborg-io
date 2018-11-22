@@ -110,12 +110,10 @@ const collectUntilDone = (orderRef) => {
                 switch (collectResponse.data.status) {
                     case 'complete':
                         clearInterval(timer);
-                        resolve(collectResponse);
-                        break;
+                        return resolve(collectResponse);
                     case 'failed' :
                         clearInterval(timer);
-                        resolve(collectResponse.hintCode);
-                        break;
+                        return resolve(collectResponse.hintCode);
                 }
             } catch (err) {
                 clearInterval(timer);
