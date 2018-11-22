@@ -4,55 +4,6 @@ const https = require('https');
 const path = require('path');
 var fs = require('fs');
 
-exports.signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
-    try {
-        if (!endUserIp) {
-            return {
-                status: 400,
-                message: 'Missing required arguments: endUserIp.',
-                errorCode: 'invalidParameters'
-            };
-        }
-
-        return await call('/sign', {
-            personalNumber: personalNumber.toString(),
-            endUserIp: endUserIp.toString(),
-            userVisibleData: userVisibleData
-                ? Buffer.from(userVisibleData).toString('base64')
-                : undefined
-        }).then((response) => {
-            if (!response.data) {
-                return response;
-            };
-
-            const timer = setInterval(() => {
-                call('/collect', {
-                    orderRef: response.data.orderRef
-                })
-                    .then((response) => {
-                        switch (response.status) {
-                            case 'completed':
-                                clearInterval(timer);
-                                return response;
-                            case 'failed' :
-                                clearInterval(timer);
-                                return response.hintCode;
-                            default:
-                                console.log(response);
-                                break;
-                        }
-                    })
-                    .catch(err => {
-                        clearInterval(timer);
-                        return err;
-                    });
-            }, 1000);
-        });
-    } catch (error) {
-        console.log('error', error);
-    }
-};
-
 exports.auth = async (endUserIp) => {
     try {
         if (!endUserIp) {
@@ -109,6 +60,69 @@ exports.collect = async (orderRef) => {
     } catch (error) {
         console.log('error', error);
     }
+};
+
+exports.signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
+    try {
+        if (!endUserIp) {
+            return {
+                status: 400,
+                message: 'Missing required arguments: endUserIp.',
+                errorCode: 'invalidParameters'
+            };
+        }
+
+        const signingResponse = await call('/sign', {
+            personalNumber: personalNumber.toString(),
+            endUserIp: endUserIp.toString(),
+            userVisibleData: userVisibleData
+                ? Buffer.from(userVisibleData).toString('base64')
+                : undefined
+        });
+
+        if (signingResponse.status !== 200) {
+            return response;
+        } else {
+            return collectUntilDone(signingResponse.data.orderRef);
+        };
+    } catch (error) {
+        console.log('error', error);
+    }
+};
+
+const collectUntilDone = (orderRef) => {
+    return new Promise((resolve, reject) => {
+        let counter = 0;
+
+        const timer = setInterval(async () => {
+            try {
+                counter++;
+
+                // 5min limit
+                if (counter === 150) {
+                    clearInterval(timer);
+                }
+
+                const collectResponse = await call('/collect', {
+                    orderRef
+                });
+
+                switch (collectResponse.data.status) {
+                    case 'complete':
+                        clearInterval(timer);
+                        resolve(collectResponse);
+                        break;
+                    case 'failed' :
+                        clearInterval(timer);
+                        resolve(collectResponse.hintCode);
+                        break;
+                }
+            } catch (err) {
+                clearInterval(timer);
+                reject(err);
+            }
+        }, 2000);
+    });
 };
 
 const call = (path, payload) => {

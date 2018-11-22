@@ -4,9 +4,10 @@ const bankid = require('./dalBankid');
 router.post('/signAndCollect', async (req, res) => {
     try {
         const { endUserIp, personalNumber, userVisibleData } = req.body;
+        const response = await bankid.signAndCollect(endUserIp, personalNumber, userVisibleData);
 
         return res.json(
-            await bankid.signAndCollect(endUserIp, personalNumber, userVisibleData)
+            response
         );
     } catch (err) {
         console.log('err', err);
