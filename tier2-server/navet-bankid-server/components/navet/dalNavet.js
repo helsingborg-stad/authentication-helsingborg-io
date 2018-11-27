@@ -31,11 +31,13 @@ exports.getPerson = async (body) => {
         } else {
             console.log('i didnt find him');
             const res = await axiosClient.post(url, { id });
+            console.log(res)
             const stringData = await JSON.stringify(res.data);
             // await hset(id, stringData);
             return res.data;
         }
     } catch (error) {
+        return error;
     }
 };
 

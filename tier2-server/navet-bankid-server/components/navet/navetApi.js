@@ -13,16 +13,10 @@ router.get('/', ExpressJoi(navetSchema), async (req, res) => {
 });
 // just test route
 router.post('/test', (req, res) => {
-
-    console.log(req.body);
     try {
-        console.log('this is test +++++++++++++++++++++++++++++++++');
-        console.log(req.body);
-        console.log(req.headers)
         return res.json('hello');
     } catch (err) {
-        console.log('3001 error')
-        res.json(err);xcxc
+        res.json(err);
     }
 });
 
