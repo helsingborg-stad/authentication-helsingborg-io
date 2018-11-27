@@ -1,3 +1,0 @@
-/*
- import schemas from other components and validate them
-*/
