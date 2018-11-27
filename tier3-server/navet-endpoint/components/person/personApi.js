@@ -8,12 +8,11 @@ const SchemaValidator = require('../middlewares/schemaValidators');
 const validateRequest = SchemaValidator(true);
 */
 // changed to get temp, it was post
-router.get('/', /* validateRequest, */ async (req, res) => {
+router.post('/', /* validateRequest, */ async (req, res) => {
     try {
         return res.json(await dalPerson.getPerson(req.body));
     } catch (err) {
-        console.log(err);
-        res.json(err);
+        res.json(err.header);
     }
 });
 

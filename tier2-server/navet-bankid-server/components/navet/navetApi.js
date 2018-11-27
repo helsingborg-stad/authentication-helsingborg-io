@@ -1,20 +1,28 @@
 const router = require('express').Router();
 const dalNavet = require('./dalNavet');
 const navetModel = require('./navetModel');
+const navetSchema = require('./navetSchema');
+const ExpressJoi = require('express-joi-validator');
 
-/*
-not yet implemented in boiler
-const SchemaValidator = require('../middlewares/schemaValidators');
-const validateRequest = SchemaValidator(true);
-*/
-
-// changed to get temp, it was post
-router.get('/', /* validateRequest, */ async (req, res) => {
+router.get('/', ExpressJoi(navetSchema), async (req, res) => {
     try {
         return res.json(await dalNavet.getPerson(req.body));
     } catch (err) {
-        console.log(err);
         res.json(err);
+    }
+});
+// just test route
+router.post('/test', (req, res) => {
+
+    console.log(req.body);
+    try {
+        console.log('this is test +++++++++++++++++++++++++++++++++');
+        console.log(req.body);
+        console.log(req.headers)
+        return res.json('hello');
+    } catch (err) {
+        console.log('3001 error')
+        res.json(err);xcxc
     }
 });
 

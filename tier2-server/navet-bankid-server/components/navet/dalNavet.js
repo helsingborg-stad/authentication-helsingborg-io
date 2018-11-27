@@ -2,57 +2,63 @@ const redis = require('redis');
 const axios = require('axios');
 const https = require('https');
 const client = redis.createClient();
+const fs = require('fs');
 
 client.on('error', (err) => {
     console.log('Error ' + err);
 });
 
-exports.getPerson = (body) => {
-    return new Promise((resolve, reject) => {
-        if (body.id) {
-            client.hget('persons', body.id, (err, reply) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    if (!reply) {
-                        return fetchAndSavePerson(body, resolve, reject);
-                    } else {
-                        resolve(JSON.parse(reply));
-                    }
-                }
-            });
+const url = 'https://localhost:3000/getPerson';
+
+const axiosClient = axios.create({
+    httpsAgent: new https.Agent({
+        rejectUnauthorized: false,
+        cert: fs.readFileSync(process.env.SERVERCERT),
+        key: fs.readFileSync(process.env.SERVERKEY)
+    }),
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+exports.getPerson = async (body) => {
+    try {
+        const id = body.id;
+        let reply = await hget(id);
+        if (reply) {
+            console.log('i found him in database');
+            return JSON.parse(reply);
         } else {
-            // insert error handling
-            // reject();
+            console.log('i didnt find him');
+            const res = await axiosClient.post(url, { id });
+            const stringData = await JSON.stringify(res.data);
+            // await hset(id, stringData);
+            return res.data;
         }
+    } catch (error) {
+    }
+};
+
+const hget = (id) => {
+    return new Promise((resolve, reject) => {
+        client.hget('persons', id, (err, reply) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(reply);
+            }
+        });
     });
 };
 
-function fetchAndSavePerson (body, resolve, reject) {
-    const httpsAgent = new https.Agent({
-        rejectUnauthorized: false,
-        key: process.env.SERVERKEY,
-        cert: process.env.SERVERCERT
+const hset = (id, stringData) => {
+    return new Promise((resolve, reject) => {
+        client.hmset('persons', id, stringData, (err, reply) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(reply);
+            }
+        });
     });
-    axios({
-        method: 'get',
-        url: 'https://localhost:3000/getPerson',
-        data: body
-    }, { httpsAgent }).then((response) => {
-        let data = response.data;
-        return savePerson(data, resolve, reject);
-    }).catch((error) => {
-        reject(error);
-    });
-}
-
-function savePerson (data, resolve, reject) {
-    let stringData = JSON.stringify(data);
-    client.hmset('persons', data.id, stringData, (err, reply) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(data);
-        }
-    });
-}
+};

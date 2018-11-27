@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon -r dotenv/config app.js",
+    "start2": "node -r dotenv/config app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Morgan Ottosson",
@@ -24,6 +25,7 @@
     "await": "^0.2.6",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
+    "body-parser-xml": "^1.1.0",
     "dotenv": "^6.1.0",
     "easy-soap-request": "^2.3.0",
     "eslint-config-airbnb": "^17.1.0",
@@ -32,6 +34,10 @@
     "joi": "^14.0.6",
     "redis": "^2.8.0",
     "soap": "^0.25.0",
-    "swagger-ui-express": "^4.0.1"
+    "swagger-ui-express": "^4.0.1",
+    "utf8": "^3.0.0",
+    "xml": "^1.0.1",
+    "xml2js": "^0.4.19",
+    "xml2json": "^0.11.2"
   }
 }
