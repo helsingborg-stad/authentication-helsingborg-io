@@ -4,7 +4,6 @@ const https = require('https');
 const client = redis.createClient();
 const fs = require('fs');
 const navetData = require('./objectSchemas/navetData');
-const ExpressJoi = require('express-joi-validator');
 
 client.on('error', (err) => {
     console.log('Error ' + err);
