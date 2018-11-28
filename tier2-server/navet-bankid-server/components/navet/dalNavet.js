@@ -3,6 +3,8 @@ const axios = require('axios');
 const https = require('https');
 const client = redis.createClient();
 const fs = require('fs');
+const navetData = require('./objectSchemas/navetData');
+const ExpressJoi = require('express-joi-validator');
 
 client.on('error', (err) => {
     console.log('Error ' + err);
@@ -31,14 +33,25 @@ exports.getPerson = async (body) => {
         } else {
             console.log('i didnt find him');
             const res = await axiosClient.post(url, { id });
-            console.log(res)
-            const stringData = await JSON.stringify(res.data);
-            // await hset(id, stringData);
-            return res.data;
+            res.data.id = res.data.Folkbokforingspost.Personpost.PersonId.PersonNr;
+            const validRes = await validate(res.data);
+            const stringData = await JSON.stringify(validRes);
+            const saveResponse = await hset(validRes.id, stringData);
+            return validRes;
         }
     } catch (error) {
         return error;
     }
+};
+
+const validate = (input) => {
+    return new Promise((resolve, reject) => {
+        try {
+            resolve(navetData.validate(input));
+        } catch (error) {
+            reject(error);
+        }
+    });
 };
 
 const hget = (id) => {

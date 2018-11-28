@@ -10,22 +10,22 @@ const axiosClient = axios.create({
         rejectUnauthorized: false,
         key: fs.readFileSync(process.env.komAKey),
         cert: fs.readFileSync(process.env.komACrt),
-        passphrase: process.env.passphrase,
+        passphrase: process.env.passphrase
     }),
     headers: {
-        'Content-Type': 'text/xml;charset=UTF-8',
-    },
+        'Content-Type': 'text/xml;charset=UTF-8'
+    }
 });
 
 exports.getPerson = async (id) => {
     let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="http://xmls.skatteverket.se/se/skatteverket/folkbokforing/na/epersondata/V1"> <soapenv:Header/> <soapenv:Body> <v1:PersonpostRequest> <v1:Bestallning> <v1:OrgNr>162021004748</v1:OrgNr> <v1:BestallningsId>00000079-FO01-0008</v1:BestallningsId> </v1:Bestallning> <v1:PersonId>${id.id}</v1:PersonId> </v1:PersonpostRequest> </soapenv:Body> </soapenv:Envelope>`;
     try {
         const res = await axiosClient.post(url, xml);
-        if(res.data) {
+        if (res.data) {
             const resParsed = await parseJSON(res.data);
-            return(resParsed);
+            return (resParsed);
         } else {
-            return ('data is empty')
+            return ('data is empty');
         }
     } catch (error) {
         const errorParsed = await parseJSONError(error.response.data);
@@ -43,7 +43,7 @@ const parseJSON = (input) => {
         } catch (error) {
             reject(error);
         }
-    })
+    });
 };
 
 const parseJSONError = (input) => {
@@ -55,5 +55,5 @@ const parseJSONError = (input) => {
         } catch (error) {
             reject(error);
         }
-    })
+    });
 };

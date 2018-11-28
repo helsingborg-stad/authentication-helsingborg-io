@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const dalNavet = require('./dalNavet');
-const navetModel = require('./navetModel');
 const navetSchema = require('./navetSchema');
 const ExpressJoi = require('express-joi-validator');
 
