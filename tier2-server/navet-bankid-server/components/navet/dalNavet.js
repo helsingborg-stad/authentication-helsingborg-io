@@ -9,8 +9,6 @@ client.on('error', (err) => {
     console.log('Error ' + err);
 });
 
-const url = 'https://localhost:3000/getPerson';
-
 const axiosClient = axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false,
@@ -31,7 +29,7 @@ exports.getPerson = async (body) => {
             return JSON.parse(reply);
         } else {
             console.log('i didnt find him');
-            const res = await axiosClient.post(url, { id });
+            const res = await axiosClient.post(process.env.localhost3000, { id });
             res.data.id = res.data.Folkbokforingspost.Personpost.PersonId.PersonNr;
             const validRes = await validate(res.data);
             const stringData = await JSON.stringify(validRes);

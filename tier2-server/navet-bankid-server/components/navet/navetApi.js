@@ -11,8 +11,9 @@ router.get('/', ExpressJoi(navetSchema), async (req, res) => {
     }
 });
 // just test route
-router.post('/test', (req, res) => {
+router.get('/test', (req, res) => {
     try {
+        console.log('this is test')
         return res.json('hello');
     } catch (err) {
         res.json(err);

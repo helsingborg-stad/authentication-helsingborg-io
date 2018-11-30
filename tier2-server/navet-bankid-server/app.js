@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const https = require('https');
 const bodyParser = require('body-parser');
@@ -19,11 +20,12 @@ app.get('/', (req, res) => res.send('Hello World!'));
 app.use(require('./components'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-https.createServer({
+
+const server = https.createServer({
     cert: fs.readFileSync(process.env.SERVERCERT),
     key: fs.readFileSync(process.env.SERVERKEY),
     requestCert: true,
     rejectUnauthorized: false
 }, app).listen(process.env.PORT, () => console.log(`Example app listening on port ${process.env.PORT}!`));
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+module.exports = server;
