@@ -4,6 +4,7 @@ const https = require('https');
 const client = redis.createClient();
 const fs = require('fs');
 const navetData = require('./objectSchemas/navetData');
+const bankidData = require('./objectSchemas/bankidData');
 
 client.on('error', (err) => {
     console.log('Error ' + err);
@@ -22,6 +23,7 @@ const axiosClient = axios.create({
 
 exports.getPerson = async (body) => {
     try {
+        console.log('did i enter');
         const id = body.id;
         let reply = await hget(id);
         if (reply) {
@@ -29,22 +31,27 @@ exports.getPerson = async (body) => {
             return JSON.parse(reply);
         } else {
             console.log('i didnt find him');
-            const res = await axiosClient.post(process.env.localhost3000, { id });
+            const resBankid = await axiosClient.post(process.env.bankidUrl);
+            const validResBankid = await validate(resBankid.data, bankidData);
+
+            const res = await axiosClient.post(process.env.navetUrl, { id });
             res.data.id = res.data.Folkbokforingspost.Personpost.PersonId.PersonNr;
-            const validRes = await validate(res.data);
-            const stringData = await JSON.stringify(validRes);
-            const saveResponse = await hset(validRes.id, stringData);
-            return validRes;
+            const validResNavet = await validate(res.data, navetData);
+
+            const toBeSaved = { validResNavet, validResBankid };
+            const stringData = await JSON.stringify(toBeSaved);
+            const saveResponse = await hset(validResNavet.id, stringData);
+            return { validResNavet, validResBankid };
         }
     } catch (error) {
         return error;
     }
 };
 
-const validate = (input) => {
+const validate = (input, schema) => {
     return new Promise((resolve, reject) => {
         try {
-            resolve(navetData.validate(input));
+            resolve(schema.validate(input));
         } catch (error) {
             reject(error);
         }

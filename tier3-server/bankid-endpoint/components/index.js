@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-router.use('/getNavet', require('./navet/api'));
+router.use('/bankid', require('./bankid/api'));
 
 module.exports = router;

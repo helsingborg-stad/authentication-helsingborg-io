@@ -25,6 +25,6 @@ const server = https.createServer({
     key: fs.readFileSync(process.env.SERVERKEY),
     requestCert: true,
     rejectUnauthorized: false
-}, app).listen(process.env.PORT, () => console.log(`Example app listening on port ${process.env.PORT}!`));
+}, app).listen(process.env.PORT, () => console.log(`Example app listening on port 3000!`));
 
 module.exports = server;
