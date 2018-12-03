@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const bankid = require('./dalBankid');
+const bankid = require('./dal');
 
 router.post('/auth', async (req, res) => {
     try {

@@ -14,7 +14,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(bodyParser.xml({ normalize: true }));
+app.use(bodyParser.xml({normalize: true}));
 
 app.get('/', (req, res) => res.send('Hello World!'));
 app.use(require('./components'));
@@ -25,6 +25,6 @@ const server = https.createServer({
     key: fs.readFileSync(process.env.SERVERKEY),
     requestCert: true,
     rejectUnauthorized: false
-}, app).listen(process.env.PORT, () => console.log(`Example app listening on port ${process.env.PORT}!`));
+}, app).listen(process.env.PORT, () => console.log(`Example app listening on port 3000!`));
 
 module.exports = server;

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-router.use('/getNavet', require('./navet/api'));
+router.use('/getBygglov', require('./bygglov/api'));
 
 module.exports = router;

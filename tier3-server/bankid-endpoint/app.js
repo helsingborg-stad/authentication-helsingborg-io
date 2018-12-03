@@ -13,7 +13,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(bodyParser.xml({ normalize: true }));
+app.use(bodyParser.xml({normalize: true}));
 
 app.get('/', (req, res) => res.send('Hello World!'));
 app.use(require('./components'));

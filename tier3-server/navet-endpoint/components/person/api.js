@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const dalPerson = require('./dalPerson');
+const dalPerson = require('./dal');
 
 router.post('/', async (req, res) => {
     try {
