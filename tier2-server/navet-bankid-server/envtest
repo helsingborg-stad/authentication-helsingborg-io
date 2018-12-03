@@ -1,0 +1,6 @@
+SERVERCERT="../../localConfig/server.cert"
+SERVERKEY="../../localConfig/server.key"
+PORT="3200"
+
+navetUrl="https://localhost:3320/getPerson/"
+bankidUrl="https://localhost:3310/bankid/"
