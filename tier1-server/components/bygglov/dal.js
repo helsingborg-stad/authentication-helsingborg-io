@@ -21,9 +21,14 @@ const axiosClient = axios.create({
 
 exports.getBygglov = async (body) => {
     try {
+        console.log('teir1dal');
         const id = body.id;
-        const res = await axiosClient.post(process.env.navetUrl, { id });
-        return res;
+        try {
+            const res = await axiosClient.post(process.env.navetUrl, { id });
+            return res.data;
+        } catch (error) {
+            return error;
+        }
     } catch (error) {
         return error;
     }

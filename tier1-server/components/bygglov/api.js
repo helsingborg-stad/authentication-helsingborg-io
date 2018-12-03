@@ -3,8 +3,9 @@ const dal = require('./dal');
 const inputSchema = require('./inputSchema');
 const ExpressJoi = require('express-joi-validator');
 
-router.get('/', ExpressJoi(inputSchema), async (req, res) => {
+router.post('/', ExpressJoi(inputSchema), async (req, res) => {
     try {
+        console.log('paynavetbankid');
         return res.json(await dal.getBygglov(req.body));
     } catch (err) {
         res.json(err);
