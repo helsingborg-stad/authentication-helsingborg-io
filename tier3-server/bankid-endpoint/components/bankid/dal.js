@@ -4,81 +4,19 @@ const https = require('https');
 const path = require('path');
 var fs = require('fs');
 
-const apiUrl = 'https://appapi2.test.bankid.com/rp/v5';
-const testPassphrase = 'qwerty123';
-const ca = path.resolve(__dirname, '../../../../localConfig/bankid.ca');
-const pfx = path.resolve(__dirname, '../../../../localConfig/FPTestcert2.pfx');
-
-const client = axios.create({
-    httpsAgent: new https.Agent({
-        ca: fs.readFileSync(ca),
-        pfx: fs.readFileSync(pfx),
-        passphrase: testPassphrase,
-        rejectUnauthorized: false
-    }),
-    headers: {
-        'Content-Type': 'application/json'
-    }
-});
-
-const getErrorDetails = (statusCode, message, httpStatus) => {
-    return {
-        status: httpStatus,
-        bankidErrorCode: statusCode,
-        message: message
-    };
-};
-
-const getResponseData = (response) => {
-    return {
-        status: response.status,
-        data: response.data
-    };
-};
-
-const call = async (path, payload) => {
-    try {
-        const response = await client.post(apiUrl + path, payload);
-
-        var data = getResponseData(response);
-
-        return data;
-    } catch (error) {
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            // console.log('error.data', error.response.data);
-            // console.log('error.status', error.response.status);
-            // console.log('error.headers', error.response.headers);
-            return error.response;
-        } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-            console.log(error.request);
-        } else {
-        // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-        }
-        console.log(error.config);
-    }
-};
-
 exports.auth = async (endUserIp) => {
     try {
         if (!endUserIp) {
-            return callback(getErrorDetails('invalidParameters', 'Missing required arguments: endUserIp.'));
+            return {
+                status: 400,
+                message: 'Missing required arguments: endUserIp.',
+                errorCode: 'invalidParameters'
+            };
         }
 
-        const response = await call('/auth', {
+        return await call('/auth', {
             endUserIp
         });
-
-        if (response.status !== 200) {
-            return getErrorDetails(response.data.errorCode, response.data.details, response.status);
-        }
-
-        return response;
     } catch (error) {
         console.log('error', error);
     }
@@ -87,22 +25,20 @@ exports.auth = async (endUserIp) => {
 exports.sign = async (endUserIp, personalNumber, userVisibleData) => {
     try {
         if (!endUserIp) {
-            return getErrorDetails('invalidParameters', 'Missing required arguments: endUserIp.');
+            return {
+                status: 400,
+                message: 'Missing required arguments: endUserIp.',
+                errorCode: 'invalidParameters'
+            };
         }
 
-        const response = await call('/sign', {
+        return await call('/sign', {
             personalNumber: personalNumber.toString(),
             endUserIp: endUserIp.toString(),
             userVisibleData: userVisibleData
                 ? Buffer.from(userVisibleData).toString('base64')
                 : undefined
         });
-
-        if (response.status !== 200) {
-            return getErrorDetails(response.data.errorCode, response.data.details, response.status);
-        }
-
-        return response;
     } catch (error) {
         console.log('error', error);
     }
@@ -111,19 +47,126 @@ exports.sign = async (endUserIp, personalNumber, userVisibleData) => {
 exports.collect = async (orderRef) => {
     try {
         if (!orderRef) {
-            return getErrorDetails('invalidParameters', 'Missing required arguments: orderRef.');
+            return {
+                status: 400,
+                message: 'Missing required arguments: orderRef.',
+                errorCode: 'invalidParameters'
+            };
         }
 
-        const response = await call('/collect', {
+        return await call('/collect', {
             orderRef
         });
-
-        if (response.status !== 200) {
-            return getErrorDetails(response.data.errorCode, response.data.details, response.status);
-        }
-
-        return response;
     } catch (error) {
         console.log('error', error);
     }
 };
+
+exports.signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
+    try {
+        if (!endUserIp) {
+            return {
+                status: 400,
+                message: 'Missing required arguments: endUserIp.',
+                errorCode: 'invalidParameters'
+            };
+        }
+
+        const signingResponse = await call('/sign', {
+            personalNumber: personalNumber.toString(),
+            endUserIp: endUserIp.toString(),
+            userVisibleData: userVisibleData
+                ? Buffer.from(userVisibleData).toString('base64')
+                : undefined
+        });
+
+        if (signingResponse.status !== 200) {
+            return response;
+        } else {
+            return collectUntilDone(signingResponse.data.orderRef);
+        };
+    } catch (error) {
+        console.log('error', error);
+    }
+};
+
+const collectUntilDone = (orderRef) => {
+    return new Promise((resolve, reject) => {
+        let counter = 0;
+
+        const timer = setInterval(async () => {
+            try {
+                counter++;
+
+                // 5min limit
+                if (counter === 150) {
+                    clearInterval(timer);
+                }
+
+                const collectResponse = await call('/collect', {
+                    orderRef
+                });
+
+                switch (collectResponse.data.status) {
+                    case 'complete':
+                        clearInterval(timer);
+                        return resolve(collectResponse);
+                    case 'failed' :
+                        clearInterval(timer);
+                        return resolve(collectResponse.hintCode);
+                }
+            } catch (err) {
+                clearInterval(timer);
+                reject(err);
+            }
+        }, 2000);
+    });
+};
+
+const call = (path, payload) => {
+    return client.post(process.env.BANKID_API_URL + path, payload)
+        .then((response) => {
+            return response.status === 200
+                ? {
+                    status: response.status,
+                    data: response.data
+                }
+                : {
+                    status: response.status,
+                    message: response.data.details,
+                    errorCode: response.data.errorCode
+                };
+        })
+        .catch((error) => {
+            if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            // console.log('error.data', error.response.data);
+            // console.log('error.status', error.response.status);
+            // console.log('error.headers', error.response.headers);
+                return error.response;
+            } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+                console.log(error.request);
+            } else {
+            // Something happened in setting up the request that triggered an Error
+                console.log('Error', error.message);
+            }
+            console.log(error.config);
+        });
+};
+
+const client = axios.create({
+    httpsAgent: new https.Agent({
+        ca: process.env.BANKID_CA,
+        pfx: fs.readFileSync(path.resolve(__dirname, process.env.BANKID_PFX_PATH)),
+        passphrase: process.env.BANKID_PASSPHRASE,
+        rejectUnauthorized: false
+    }),
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    timeout: 5000
+});

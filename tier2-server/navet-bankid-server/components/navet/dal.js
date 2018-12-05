@@ -40,7 +40,7 @@ exports.getPerson = async (body) => {
 
             const toBeSaved = { validResNavet, validResBankid };
             const stringData = await JSON.stringify(toBeSaved);
-            const saveResponse = await hset(validResNavet.id, stringData);
+            const saveResponse = await hset(validResNavet.id, stringData, );
             return { validResNavet, validResBankid };
         }
     } catch (error) {
