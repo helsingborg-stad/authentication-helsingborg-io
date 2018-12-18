@@ -9,6 +9,12 @@ require('body-parser-xml')(bodyParser);
 
 const app = express();
 
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
 // !!!!!!!!!!!!!!!!!*********** Dont have this in prod
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
