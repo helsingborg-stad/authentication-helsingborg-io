@@ -2,6 +2,7 @@ const router = require('express').Router();
 const dal = require('./dal');
 const schema = require('./validation/authSchema');
 const ExpressJoi = require('express-joi-validator');
+const jwt = require('jsonwebtoken');
 
 router.post('/', ExpressJoi(schema), async (req, res) => {
     try {
@@ -16,6 +17,14 @@ router.post('/', ExpressJoi(schema), async (req, res) => {
 // just test route
 router.post('/test', (req, res) => {
     try {
+        const { personalNumber } = req.body;
+        // Issue token
+        const payload = { personalNumber };
+        const token = jwt.sign(payload, process.env.SECRET, {
+            expiresIn: '1h'
+        });
+        res.cookie('token', token, { httpOnly: true });
+
         return res.json(
             {
                 'user': {

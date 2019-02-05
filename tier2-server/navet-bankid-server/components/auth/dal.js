@@ -46,7 +46,7 @@ exports.authenticate = async (request) => {
 };
 
 const authenticateWithBankId = async (payload) => {
-    const response = await axiosClient.post(`${process.env.bankidUrl}/signAndCollect`, payload);
+    const response = await axiosClient.post(`${process.env.BANKIDURL}/signAndCollect`, payload);
 
     // const validatedResponse = await validate(response.data.data.completionData.user, bankidSchema);
     console.log('bankid response', response.data);
@@ -54,7 +54,7 @@ const authenticateWithBankId = async (payload) => {
 };
 
 const getNavetData = async (personalNumber) => {
-    const response = await axiosClient.post(process.env.navetUrl, { id: personalNumber });
+    const response = await axiosClient.post(process.env.NAVETURL, { id: personalNumber });
     response.data.id = response.data.Folkbokforingspost.Personpost.PersonId.PersonNr;
 
     // const validResNavet = await validate(response.data, navetSchema);

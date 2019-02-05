@@ -5,5 +5,5 @@ komAKey="../../localConfig/KommunA.key"
 passphrase="8017644482212111"
 PORT="3320"
 
-navetUrl="https://localhost:3320/getPerson/"
-bankidUrl="https://localhost:3310/bankid/"
+NAVETURL="https://localhost:3320/getPerson/"
+BANKIDURL="https://localhost:3310/bankid/"
