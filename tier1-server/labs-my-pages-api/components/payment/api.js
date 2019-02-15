@@ -6,21 +6,22 @@ const authSchemas = require('./validationSchemas/index');
 const schemaValidator = require('../middlewares/schemaValidator');
 const validateRequest = schemaValidator(true, authSchemas);
 
-router.get('/:id', validateRequest, async (_req, res) => {
+router.post('/initialize', validateRequest, async (req, res) => {
     try {
-        return res.json(
-            {
-                'user': {
-                    'name': 'Tom Andreasson',
-                    'givenName': 'Tom',
-                    'surname': 'Andreasson',
-                    'personalNumber': '198404293279',
-                    'address': 'Drottninggatan 1',
-                    'zipCode': 11120,
-                    'city': 'Stockholm'
+        const orderId = await dal.createOrder(req.body);
+        console.log('orderid', orderId);
+        if (orderId) {
+            const paymentInfo = await dal.initializePayment(req.body, orderId);
+            console.log('paymentInfo', paymentInfo);
+
+            return res.json(
+                {
+                    paymentInfo
                 }
-            }
-        );
+            );
+        }
+
+        return null;
     } catch (err) {
         res.json(err);
     }
