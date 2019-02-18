@@ -5,11 +5,13 @@ const mysql = require('mysql');
 
 exports.createOrder = async (request) => {
     try {
-        const { totalAmount } = request;
+        const { totalAmount, personalNumber } = request;
+
+        const users = await getUser(personalNumber);
 
         const localOrderId = await createLocalOrder({
             Date: Date.now(),
-            UserId: 1,
+            UserId: users ? users[0].Id : null,
             TotalAmount: totalAmount,
             Status: 100
         });
@@ -193,6 +195,25 @@ const updateOrderStatus = (externalOrderId, statusCode) => {
         } catch (error) {
             console.log(error);
             resolve(false);
+        }
+    });
+};
+
+const getUser = async (personalNumber) => {
+    return new Promise(function (resolve, reject) {
+        try {
+            const db = getDbConnection();
+
+            db.connect(err => {
+                if (err) throw err;
+                var sql = 'SELECT * FROM users WHERE PersonalNumber = ' + mysql.escape(personalNumber);
+                db.query(sql, function (err, result) {
+                    if (err) throw err;
+                    resolve(result);
+                });
+            });
+        } catch (error) {
+            reject(error);
         }
     });
 };
