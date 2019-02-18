@@ -27,4 +27,29 @@ router.post('/initialize', validateRequest, async (req, res) => {
     }
 });
 
+router.get('/confirm/:id', validateRequest, async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        console.log('orderid', orderId);
+
+        if (orderId) {
+            const order = await dal.confirmPayment(orderId);
+            console.log('order', order);
+
+            if (order) {
+                return res.json(
+                    {
+                        ...order
+                    }
+                );
+            }
+        }
+
+        throw Error('No order found');
+    } catch (err) {
+        res.json(err);
+    }
+});
+
 module.exports = router;
