@@ -31,8 +31,15 @@ The specific .env-parameters required for these projects are:
   - komAKey (path to the navet key-file)
   - passphrase (passphrase for the navet api)
 
+You will need to have Redis installed on your computer for the navet-bankid-server to work.
+
 ## Bankid
 To use the bankid test api you need to create a test-id via bankid and set it up on a phone, further instructions can be found on their official docs. If you want to bypass this step while developing there is function named authenticateWithBankId that can be changed to bypassBankid. This will skip the call to bankid and return hardcoded user data, which can be useful while developing.
 
 ## Navet
-On their test-api, Navet has a limited number of test-"personal id numbers" that return actual data. To see which ones you can read the offical docs.
+On their test-api, Navet has a limited number of test-"personal id numbers" that return actual data. To see which ones you can read the offical docs. This call can be bypassed by changing the getNavetData-function to bypassNavetData if you want hardcoded user data while developing.
+
+## Redis
+The navet-bankid-server uses redis for caching data from Navet to keep down the api calls made against their api.
+
+
