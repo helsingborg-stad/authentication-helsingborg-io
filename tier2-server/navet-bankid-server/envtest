@@ -1,6 +1,0 @@
-SERVERCERT="../../localConfig/server.cert"
-SERVERKEY="../../localConfig/server.key"
-PORT="3200"
-
-NAVETURL="https://localhost:3320/getPerson/"
-BANKIDURL="https://localhost:3310/bankid/"

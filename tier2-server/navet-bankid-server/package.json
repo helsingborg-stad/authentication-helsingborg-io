@@ -8,7 +8,7 @@
     "test": "./node_modules/.bin/mocha",
     "test:watch": "mocha --watch ./test ./"
   },
-  "author": "Morgan Ottosson",
+  "author": "HiQ",
   "license": "MIT",
   "devDependencies": {
     "chai-http": "^4.2.0",

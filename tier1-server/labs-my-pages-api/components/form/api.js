@@ -32,24 +32,4 @@ router.post('/', validateRequest, async (req, res) => {
     }
 });
 
-router.get('/:id', validateRequest, async (_req, res) => {
-    try {
-        return res.json(
-            {
-                'user': {
-                    'name': 'Tom Andreasson',
-                    'givenName': 'Tom',
-                    'surname': 'Andreasson',
-                    'personalNumber': '198404293279',
-                    'address': 'Drottninggatan 1',
-                    'zipCode': 11120,
-                    'city': 'Stockholm'
-                }
-            }
-        );
-    } catch (err) {
-        res.json(err);
-    }
-});
-
 module.exports = router;

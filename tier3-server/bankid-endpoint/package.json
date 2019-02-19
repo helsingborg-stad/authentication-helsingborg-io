@@ -1,14 +1,14 @@
 {
   "name": "bankidendpoint",
   "version": "1.0.0",
-  "description": "Endpoint for the bankid implementation.",
+  "description": "Endpoint for direct communication with the Bankid api.",
   "main": "app.js",
   "scripts": {
     "start": "nodemon -r dotenv/config app.js",
     "start2": "node -r dotenv/config app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Eldin Behlic",
+  "author": "HiQ",
   "license": "MIT",
   "devDependencies": {
     "eslint": "^5.9.0",

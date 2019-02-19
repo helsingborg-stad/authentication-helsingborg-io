@@ -1,6 +1,6 @@
 'use strict';
 const express = require('express');
-const http = require('http');
+const https = require('https');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger/swagger.json');
@@ -26,7 +26,7 @@ app.get('/', (req, res) => res.send('Hello World!'));
 app.use(require('./components'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const server = http.createServer({
+const server = https.createServer({
     cert: fs.readFileSync(process.env.SERVERCERT),
     key: fs.readFileSync(process.env.SERVERKEY),
     requestCert: true,

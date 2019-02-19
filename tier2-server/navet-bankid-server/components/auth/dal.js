@@ -8,37 +8,46 @@ const redisClient = redis.createClient();
 
 exports.authenticate = async (request) => {
     try {
+        console.log(request);
         const { personalNumber, endUserIp, userVisibleData } = request;
 
-        let reply = await hget(personalNumber);
+        // Authenticate against bankid.
+        const bankIdUserData = await bypassBankid({ // authenticateWithBankId
+            // personalNumber,
+            personalNumber: '198404293279',
+            endUserIp,
+            userVisibleData
+        });
 
-        if (reply) {
-            console.log('i found him in database');
-            return JSON.parse(reply);
-        } else {
-            console.log('i didnt find him');
-            console.log(request);
+        // If auth was successful there is userdata in the response.
+        if (bankIdUserData) {
+            let navetData = null;
+            // Check for cached data about the user from Navet.
+            // const cachedUserData = await hget(personalNumber);
+            const cachedUserData = null;
 
-            const userData = await authenticateWithBankId({
-                // personalNumber,
-                personalNumber: '198404293279',
-                endUserIp,
-                userVisibleData
-            });
-
-            const navetResponse = await getNavetData(personalNumber);
-            // const navetResponse = await getNavetData(personalNumber);
+            if (cachedUserData) {
+                console.log('cached', cachedUserData);
+                navetData = Object.assign({}, ...cachedUserData);
+            } else {
+                // If there is no cached data we fetch it again from Navet
+                navetData = await bypassNavetData(personalNumber); // getNavetData
+                // await hset(personalNumber, JSON.stringify(navetData));
+            }
 
             return {
+                // Combine Bankid and Navet data.
                 user: {
-                    personalNumber: userData.personalNumber,
-                    name: userData.name,
-                    givenName: userData.givenName,
-                    surname: userData.surname,
-                    navet: navetResponse
+                    personalNumber: bankIdUserData.personalNumber,
+                    name: bankIdUserData.name,
+                    givenName: bankIdUserData.givenName,
+                    surname: bankIdUserData.surname,
+                    navet: navetData
                 }
             };
         }
+
+        return null;
     } catch (error) {
         console.log(error);
         return error;
@@ -46,35 +55,34 @@ exports.authenticate = async (request) => {
 };
 
 const authenticateWithBankId = async (payload) => {
+    console.log('payload', payload);
     const response = await axiosClient.post(`${process.env.BANKIDURL}/signAndCollect`, payload);
 
-    // const validatedResponse = await validate(response.data.data.completionData.user, bankidSchema);
     console.log('bankid response', response.data);
     return response.data.data.completionData.user;
+};
+
+const bypassBankid = async (payload) => {
+    return {
+        'name': 'Tom Andreasson',
+        'givenName': 'Tom',
+        'surname': 'Andreasson',
+        'personalNumber': '198404293279'
+    };
+};
+
+const bypassNavetData = async (payload) => {
+    return {
+        'address': 'Drottninggatan 2',
+        'zipCode': 11120,
+        'city': 'Stockholm'
+    };
 };
 
 const getNavetData = async (personalNumber) => {
     const response = await axiosClient.post(process.env.NAVETURL, { id: personalNumber });
     response.data.id = response.data.Folkbokforingspost.Personpost.PersonId.PersonNr;
-
-    // const validResNavet = await validate(response.data, navetSchema);
-
     return response.data;
-};
-
-const validate = (input, schema) => {
-    return new Promise((resolve, reject) => {
-        try {
-            const result = schema.validate(input);
-            if (result.error === null) {
-                resolve(result);
-            } else {
-                reject(result.error);
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
 };
 
 const hget = (id) => {

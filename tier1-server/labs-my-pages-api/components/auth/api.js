@@ -6,28 +6,24 @@ const authSchemas = require('./validationSchemas/index');
 const schemaValidator = require('../middlewares/schemaValidator');
 const validateRequest = schemaValidator(true, authSchemas);
 
-router.post('/', validateRequest, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
+        console.log('reqbody', req.body);
+
         const { pno, endUserIp } = req.body;
 
-        const user = await dal.authenticate(pno, endUserIp, 'Helsingborg stad');
+        console.log('pno', pno);
+        console.log('eui', endUserIp);
 
-        if (pno === user.pno) {
-            console.log('auth valid!');
-            let token = jwt.sign({ pno: user.pno }, process.env.AUTHSECRET, { expiresIn: '24h' }); // Signing the token
+        const user = await dal.authenticate(pno, endUserIp);
+        console.log('user', user);
+        if (user && pno === user.personalNumber) {
+            let token = jwt.sign({ pno: user.personalNumber }, process.env.AUTHSECRET, { expiresIn: '24h' }); // Signing the token
             res.json({
                 sucess: true,
                 err: null,
                 token,
-                user: {
-                    'name': 'Tom Andreasson',
-                    'givenName': 'Tom',
-                    'surname': 'Andreasson',
-                    'personalNumber': '198404293279',
-                    'address': 'Drottninggatan 1',
-                    'zipCode': 11120,
-                    'city': 'Stockholm'
-                }
+                user: user
             });
         } else {
             console.log('auth failed');

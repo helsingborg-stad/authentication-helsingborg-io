@@ -1,14 +1,14 @@
 {
-  "name": "minasiderboiler",
+  "name": "navetendpoint",
   "version": "0.0.1",
-  "description": "Boilerplate for the mina sider project",
+  "description": "Endpoint for direct communication with the Navet api.",
   "main": "app.js",
   "scripts": {
     "start": "nodemon -r dotenv/config app.js",
     "start2": "node -r dotenv/config app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Morgan Ottosson",
+  "author": "HiQ",
   "license": "MIT",
   "devDependencies": {
     "eslint": "^5.9.0",
