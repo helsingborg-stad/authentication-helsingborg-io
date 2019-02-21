@@ -1,5 +1,0 @@
-SERVERCERT="../localConfig/server.cert"
-SERVERKEY="../localConfig/server.key"
-PORT="3100"
-
-navetUrl="https://localhost:3200/getNavet/"
