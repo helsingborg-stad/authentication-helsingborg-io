@@ -1,0 +1,60 @@
+# Helsingborg Stad CircleCI Build Config
+#
+# Supported Build process: Dockerized NodeJS Apps deployed on Heroku
+#
+# -- TESTS --
+#
+# This build config will make a basic warmup of the docker. It's up
+# to the application itself to run the required tests to validate
+# the functionality. This build will fail if any error message is thrown.
+#
+# -- SETUP --
+# You need to get the following steps done before this build will complete.
+#
+# 1. Create a git repository.
+# 2. Link the git repository to circle ci
+# 4. Create a heroku container repository
+# 5. Run the build
+#
+# More detailed information on how to complete this and enviroment
+# variables can be found in internal confluence documentation.
+#
+# -- AUTHORS --
+#
+# Sebastian Thulin (sebastian.thulin@helsingborg.se)
+#
+version: 2.1
+executors:
+  docker-publisher:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+
+jobs:
+  build:
+    executor: docker-publisher
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $CIRCLE_PROJECT_REPONAME:latest .
+
+      - run:
+          name: Archive Docker image
+          command: docker save -o image.tar $CIRCLE_PROJECT_REPONAME
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+
+workflows:
+  version: 2
+  build-master:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
