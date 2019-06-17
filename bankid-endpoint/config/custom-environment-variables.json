@@ -1,0 +1,23 @@
+{
+  "LOG": {
+    "LEVEL": "LOG_LEVEL"
+  },
+  "SERVER": {
+    "PORT": "PORT",
+    "CERT": "SERVER_CERT",
+    "KEY": "SERVER_KEY"
+  },
+  "BANKID": {
+    "CA": "BANKID_CA",
+    "PFX_PATH":"BANKID_PFX_PATH",
+    "API_URL": "BANKID_API_URL",
+    "PASSPHRASE": "BANKID_PASSPHRASE"
+  },
+  "MYSQL": {
+    "HOST": "MYSQL_HOST",
+    "DB": "MYSQL_DB",
+    "CONNECTION_LIMIT": "MYSQL_CONNECTION_LIMIT",
+    "USER": "MYSQL_USER",
+    "PASSWORD": "MYSQL_PASSWORD"
+  }
+}

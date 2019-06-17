@@ -1,0 +1,23 @@
+{
+  "LOG": {
+    "LEVEL": "trace"
+  },
+  "SERVER": {
+    "PORT": "env_placeholder",
+    "SERVER_CERT": "env_placeholder",
+    "SERVER_KEY": "env_placeholder"
+  },
+  "BANKID": {
+    "BANKID_CA": "env_placeholder",
+    "BANKID_PFX_PATH":"env_placeholder",
+    "BANKID_API_URL": "env_placeholder",
+    "BANKID_PASSPHRASE": "env_placeholder"
+  },
+  "MYSQL": {
+    "HOST": "127.0.0.1",
+    "DB": "Dummy",
+    "CONNECTION_LIMIT": 10,
+    "USER": "root",
+    "PASSWORD": "root"
+  }
+}
