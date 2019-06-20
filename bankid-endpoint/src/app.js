@@ -11,7 +11,7 @@ const routes = require('./components/routes');
 /**
  * Config
  */
-const SERVER_PORT = config.get('SERVER.PORT');
+const SERVER_PORT = process.env.PORT || config.get('SERVER.PORT');
 const CERT = config.get('SERVER.CERT');
 const KEY = config.get('SERVER.KEY');
 
@@ -19,7 +19,7 @@ const httpsOptions = {
   cert: fs.readFileSync(CERT),
   key: fs.readFileSync(KEY),
   requestCert: true,
-  rejectUnauthorized: false,
+  rejectUnauthorized: false
 };
 
 /**

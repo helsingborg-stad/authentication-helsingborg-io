@@ -16,6 +16,19 @@ const routes = () => {
     }
   });
 
+  router.post('/authAndCollect', async (req, res) => {
+    try {
+      const { endUserIp} = req.body;
+      const response = await bankid.authAndCollect(endUserIp);
+
+      return res.json(response);
+    } catch (err) {
+      console.log('err', err);
+      return res.json(err);
+    }
+  });
+
+
   router.post('/auth', async (req, res) => {
     try {
       console.log('auth');
@@ -55,6 +68,20 @@ const routes = () => {
       return res.json(err);
     }
   });
+
+  router.post('/cancel', async (req, res) => {
+    try {
+      const { orderRef } = req.body;
+
+      return res.json(
+        await bankid.cancel(orderRef),
+      );
+    } catch (err) {
+      console.log('err', err);
+      return res.json(err);
+    }
+  });
+
 
   return router;
 };

@@ -42,8 +42,40 @@ const ValidationError = {
   },
 };
 
+const AuthenticationError = {
+  type: 'object',
+  properties: {
+    status: {
+      type: 'integer',
+      format: 'int64',
+    },
+    name: {
+      type: 'string',
+    },
+    data: {
+      type: 'object',
+    },
+  },
+  example: {
+    name: 'ValidationError',
+    status: 422,
+    data: {
+      object: {
+        endUserIp: '0.0.0.0',
+      },
+      details: [
+        {
+          message: 'person_id length must be at least 5 characters long',
+          type: 'string.min',
+        },
+      ],
+    },
+  },
+};
+
 const definitions = {
   ValidationError,
+  AuthenticationError,
 };
 
 module.exports = {

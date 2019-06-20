@@ -22,7 +22,7 @@ const client = axios.create({
   },
   timeout: 5000,
 });
-
+// Wrapper for all calls to bankId
 const call = (path, payload) => {
   return client.post(BANKID_API_URL + path, payload)
     .then((response) => {
@@ -86,6 +86,7 @@ const collectUntilDone = (orderRef) => {
   });
 };
 
+// Authentication call with Bank Id
 const auth = async (endUserIp) => {
   try {
     if (!endUserIp) {
@@ -104,6 +105,7 @@ const auth = async (endUserIp) => {
   }
 };
 
+// Signature call with Bank Id
 const sign = async (endUserIp, personalNumber, userVisibleData) => {
   try {
     if (!endUserIp) {
@@ -126,6 +128,7 @@ const sign = async (endUserIp, personalNumber, userVisibleData) => {
   }
 };
 
+// Collect call with Bank Id
 const collect = async (orderRef) => {
   try {
     if (!orderRef) {
@@ -144,6 +147,27 @@ const collect = async (orderRef) => {
   }
 };
 
+
+// Cancel call with Bank Id
+const cancel = async (orderRef) => {
+  try {
+    if (!orderRef) {
+      return {
+        status: 400,
+        message: 'Missing required arguments: orderRef.',
+        errorCode: 'invalidParameters',
+      };
+    }
+
+    return await call('/cancel', {
+      orderRef,
+    });
+  } catch (error) {
+    console.log('error', error);
+  }
+};
+
+// Signature and Status Collection call from Bank Id 
 const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
   try {
     if (!endUserIp) {
@@ -170,9 +194,32 @@ const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
   }
 };
 
+// Authenticate and Status Collection call from Bank Id 
+const authAndCollect = async (endUserIp) => {
+  try {
+    if (!endUserIp) {
+      return {
+        status: 400,
+        message: 'Missing required arguments: endUserIp.',
+        errorCode: 'invalidParameters',
+      };
+    }
+
+    const authenticationResponse = await call('/auth', {endUserIp: endUserIp.toString()});
+
+    if (authenticationResponse.status !== 200) return response;
+
+    return collectUntilDone(authenticationResponse.data.orderRef);
+  } catch (error) {
+    console.log('error', error);
+  }
+};
+
 module.exports = {
   auth,
   sign,
   collect,
+  cancel,
   signAndCollect,
+  authAndCollect,
 };

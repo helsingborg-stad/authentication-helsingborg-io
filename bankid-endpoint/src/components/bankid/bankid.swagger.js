@@ -1,54 +1,119 @@
 const { stringWithLimit } = require('../../../swagger/global.swagger');
 
-const personsSchema = {
-  Person: {
+const userSchema = {
+  User: {
     type: 'object',
     properties: {
-      id: {
+      endUserIp: {
+        type: 'string',
         required: true,
-        type: 'integer',
       },
-      person_id: {
-        required: true,
-        ...stringWithLimit(5, 24),
+      personalNumber: {
+        type: 'string',
+      },
+      userVisibleData: {
+        type: 'string',
       },
     },
     example: {
-      id: 10,
-      person_id: 'john_snow',
+      endUserIp: 10,
+      personalNumber: '19990929-9999',
+      userVisibleData: 'john_snow',
     },
   },
 };
 
-const personPath = {
+const authPath = {
   post: {
-    tags: ['CRUD operations'],
-    description: 'Add a person',
-    summary: 'Add Person with Service id and User id',
-    operationId: 'addPerson',
+    tags: ['Bankid'],
+    description: 'Authenticate',
+    summary: 'Authentication Service with End user ip and User personalNumber',
+    operationId: 'authenticate',
     parameters: [
       {
         in: 'body',
         name: 'body',
-        description: 'The person to create.',
+        description: 'The user to authenticate',
         required: true,
         schema: {
           type: 'object',
           properties: {
-            person_id: {
+            endUserIp: {
+              type: 'string',
               required: true,
-              ...stringWithLimit(5, 24),
+            },
+            personalNumber: {
+              type: 'string',
+              required: true,
+            },
+            userVisibleData: {
+              type: 'string',
+              required: true,
             },
           },
           example: {
-            person_id: 'john_snow',
+            user_id: 'john_snow',
+            service_id: 'iron_bank',
+            message: "Who's that blonde?",
           },
         },
       },
     ],
     responses: {
       200: {
-        description: 'Person created successfully.',
+        description: 'Authentication successfully.',
+      },
+      400: {
+        description: 'Invalid Parameters',
+        schema: {
+          $ref: '#/definitions/AuthenticationError',
+        },
+      },
+    },
+  },
+};
+const signPath = {
+  post: {
+    tags: ['CRUD operations'],
+    description: 'Add a notification',
+    summary: 'Add Notification with Service id and User id',
+    operationId: 'addNotification',
+    parameters: [
+      {
+        in: 'body',
+        name: 'body',
+        description: 'The notification to create.',
+        required: true,
+        schema: {
+          type: 'object',
+          properties: {
+            user_id: {
+              required: true,
+              ...stringWithLimit(5, 24),
+            },
+            service_id: {
+              type: 'string',
+              required: true,
+            },
+            pointer: {
+              ...stringWithLimit(0, 50),
+            },
+            message: {
+              ...stringWithLimit(10, 1000),
+              required: true,
+            },
+          },
+          example: {
+            user_id: 'john_snow',
+            service_id: 'iron_bank',
+            message: "Who's that blonde?",
+          },
+        },
+      },
+    ],
+    responses: {
+      200: {
+        description: 'Notification created successfully.',
       },
       422: {
         description: 'Validation Error',
@@ -58,35 +123,101 @@ const personPath = {
       },
     },
   },
-  get: {
+};
+const collectPath = {
+  post: {
     tags: ['CRUD operations'],
-    summary: 'Query persons',
-    description: 'Query persons by Person id.',
-    operationId: 'queryPersons',
+    description: 'Add a notification',
+    summary: 'Add Notification with Service id and User id',
+    operationId: 'addNotification',
     parameters: [
       {
-        name: 'person_id',
-        in: 'query',
-        description: 'The user id of the person',
-        type: 'string',
-      },
-      {
-        name: 'limit',
-        in: 'query',
-        description: 'The number of entities to fetch',
-        type: 'integer',
-        default: 10,
+        in: 'body',
+        name: 'body',
+        description: 'The notification to create.',
+        required: true,
+        schema: {
+          type: 'object',
+          properties: {
+            user_id: {
+              required: true,
+              ...stringWithLimit(5, 24),
+            },
+            service_id: {
+              type: 'string',
+              required: true,
+            },
+            pointer: {
+              ...stringWithLimit(0, 50),
+            },
+            message: {
+              ...stringWithLimit(10, 1000),
+              required: true,
+            },
+          },
+          example: {
+            user_id: 'john_snow',
+            service_id: 'iron_bank',
+            message: "Who's that blonde?",
+          },
+        },
       },
     ],
     responses: {
       200: {
-        description: 'successful operation',
+        description: 'Notification created successfully.',
+      },
+      422: {
+        description: 'Validation Error',
         schema: {
-          type: 'array',
-          items: {
-            $ref: '#/definitions/Person',
+          $ref: '#/definitions/ValidationError',
+        },
+      },
+    },
+  },
+};
+const cancelPath = {
+  post: {
+    tags: ['CRUD operations'],
+    description: 'Add a notification',
+    summary: 'Add Notification with Service id and User id',
+    operationId: 'addNotification',
+    parameters: [
+      {
+        in: 'body',
+        name: 'body',
+        description: 'The notification to create.',
+        required: true,
+        schema: {
+          type: 'object',
+          properties: {
+            user_id: {
+              required: true,
+              ...stringWithLimit(5, 24),
+            },
+            service_id: {
+              type: 'string',
+              required: true,
+            },
+            pointer: {
+              ...stringWithLimit(0, 50),
+            },
+            message: {
+              ...stringWithLimit(10, 1000),
+              required: true,
+            },
+          },
+          example: {
+            user_id: 'john_snow',
+            service_id: 'iron_bank',
+            message: "Who's that blonde?",
           },
         },
+      },
+    ],
+    responses: {
+      200: {
+        description: 'Notification created successfully.',
       },
       422: {
         description: 'Validation Error',
@@ -99,6 +230,9 @@ const personPath = {
 };
 
 module.exports = {
-  personPath,
-  personsSchema,
+  signPath,
+  authPath,
+  cancelPath,
+  collectPath,
+  userSchema,
 };

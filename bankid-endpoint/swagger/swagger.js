@@ -1,4 +1,4 @@
-const { personPath, personsSchema } = require('../src/components/bankid/bankid.swagger');
+const { authPath, userSchema,collectPath,cancelPath,signPath } = require('../src/components/bankid/bankid.swagger');
 const { definitions } = require('../swagger/global.swagger');
 
 module.exports = {
@@ -10,13 +10,21 @@ module.exports = {
   },
   host: 'simple.api',
   paths: {
-    '/person': {
-      post: personPath.post,
-      get: personPath.get,
+    '/auth': {
+      post: authPath.post,
+    },
+    '/sign': {
+      post: signPath.post,
+    },
+    '/cancel': {
+      post: cancelPath.post,
+    },
+    '/collect': {
+      post: collectPath.post,
     },
   },
   definitions: {
     ...definitions,
-    ...personsSchema,
+    ...userSchema,
   },
 };
