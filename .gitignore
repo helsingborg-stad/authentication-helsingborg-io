@@ -1,15 +1,1 @@
-# Dependency directories
-node_modules/
-
-# Optional eslint cache
-.eslintcache
-
-# dotenv environment variables file
-.env
-
-# Ignore Mac DS_Store files
-.DS_Store
-
-.vscode
-
-.env.test
+node_modules
