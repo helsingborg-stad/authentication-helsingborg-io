@@ -73,9 +73,7 @@ const routes = () => {
     try {
       const { orderRef } = req.body;
 
-      return res.json(
-        await bankid.cancel(orderRef),
-      );
+      return await bankid.cancel(orderRef);
     } catch (err) {
       console.log('err', err);
       return res.json(err);
