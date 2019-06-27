@@ -1,30 +1,27 @@
 const Joi = require('@hapi/joi');
-const { id, limit } = require('../../validation/global.schema');
+const { limit } = require('../../validation/global.schema');
 const personalNumber = Joi.string().regex(/^[0-9]{12}$/).required();
 
-// Generic Schema.
-const genericSchema = Joi.object().keys({
-  personalNumber: Joi.string().required(),
-  name: Joi.string().required(),
-  givenName: Joi.string().required(),
-  surname: Joi.string().required()
-});
-
-const userSchema = Joi.object().keys({
-    personalNumber,
+const authenticationSchema = Joi.object().keys({
+    personalNumber: Joi.personalNumber(),
     endUserIp: Joi.string().required(),
     userVisibleData: Joi.string()
 });
 
+const signatureSchema = Joi.object().keys({
+  personalNumber: Joi.personalNumber(),
+  endUserIp: Joi.string().required(),
+  userVisibleData: Joi.string().required(),
+  userNonVisibleData: Joi.string().required(),
+});
+
 const responseSchema = Joi.object().keys({
-  person_id: id.required(),
+  autoStartToken: Joi.string().required(),
+  orderRef: Joi.string().required(),
 });
 
 module.exports = {
-  genericSchema,
-  querySchema,
-  putSchema,
-  postSchema,
+  signatureSchema,
   responseSchema,
-  authSchema,
+  authenticationSchema,
 };

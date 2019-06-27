@@ -65,7 +65,7 @@ const AuthenticationError = {
       },
       details: [
         {
-          message: 'person_id length must be at least 5 characters long',
+          message: 'endUserIp length must be at least 5 characters long',
           type: 'string.min',
         },
       ],

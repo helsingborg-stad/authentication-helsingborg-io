@@ -1,4 +1,4 @@
-const { authPath, userSchema,collectPath,cancelPath,signPath } = require('../src/components/bankid/bankid.swagger');
+const { authPath, responsesSchema, collectPath,cancelPath,signPath, signAndCollectPath, authAndCollectPath } = require('../src/components/bankid/bankid.swagger');
 const { definitions } = require('../swagger/global.swagger');
 
 module.exports = {
@@ -13,8 +13,14 @@ module.exports = {
     '/auth': {
       post: authPath.post,
     },
+    '/authAndCollect': {
+      post: authAndCollectPath.post,
+    },
     '/sign': {
       post: signPath.post,
+    },
+    '/signAndCollect': {
+      post: signAndCollectPath.post,
     },
     '/cancel': {
       post: cancelPath.post,
@@ -25,6 +31,6 @@ module.exports = {
   },
   definitions: {
     ...definitions,
-    ...userSchema,
+    ...responsesSchema,
   },
 };
