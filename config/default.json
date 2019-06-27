@@ -12,12 +12,5 @@
     "BANKID_PFX_PATH":"env_placeholder",
     "BANKID_API_URL": "env_placeholder",
     "BANKID_PASSPHRASE": "env_placeholder"
-  },
-  "MYSQL": {
-    "HOST": "127.0.0.1",
-    "DB": "Dummy",
-    "CONNECTION_LIMIT": 10,
-    "USER": "root",
-    "PASSWORD": "root"
   }
 }
