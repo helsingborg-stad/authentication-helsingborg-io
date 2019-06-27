@@ -32,10 +32,10 @@ const routes = () => {
   router.post('/auth', async (req, res) => {
     try {
       console.log('auth');
-      const { endUserIp } = req.body;
+        const { endUserIp, personalNumber } = req.body;
 
       return res.json(
-        await bankid.auth(endUserIp),
+          await bankid.auth(endUserIp, personalNumber),
       );
     } catch (err) {
       console.log('err', err);

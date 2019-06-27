@@ -87,7 +87,7 @@ const collectUntilDone = (orderRef) => {
 };
 
 // Authentication call with Bank Id
-const auth = async (endUserIp) => {
+const auth = async (endUserIp, personalNumber) => {
   try {
     if (!endUserIp) {
       return {
@@ -99,6 +99,7 @@ const auth = async (endUserIp) => {
 
     return await call('/auth', {
       endUserIp,
+      personalNumber
     });
   } catch (error) {
     console.log('error', error);
@@ -167,7 +168,7 @@ const cancel = async (orderRef) => {
   }
 };
 
-// Signature and Status Collection call from Bank Id 
+// Signature and Status Collection call from Bank Id
 const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
   try {
     if (!endUserIp) {
@@ -194,7 +195,7 @@ const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
   }
 };
 
-// Authenticate and Status Collection call from Bank Id 
+// Authenticate and Status Collection call from Bank Id
 const authAndCollect = async (endUserIp) => {
   try {
     if (!endUserIp) {
