@@ -1,4 +1,8 @@
-const { authPath, responsesSchema, collectPath,cancelPath,signPath, signAndCollectPath, authAndCollectPath } = require('../src/components/bankid/bankid.swagger');
+const {
+  authPath, responsesSchema,
+  collectPath, cancelPath, signPath,
+  signAndCollectPath, authAndCollectPath,
+} = require('../src/components/bankid/bankid.swagger');
 const { definitions } = require('../swagger/global.swagger');
 
 module.exports = {
@@ -8,7 +12,8 @@ module.exports = {
     title: 'Simple API',
     description: 'Api document to test and document all available API functionality',
   },
-  host: 'simple.api',
+  host: 'localhost:3004',
+  basePath: '/api/v1/bankid',
   paths: {
     '/auth': {
       post: authPath.post,

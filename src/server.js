@@ -23,7 +23,6 @@ app.use(bodyParser.json());
 app.use(pino({ logger }));
 
 // Add routes to the app.
-// `${API_BASE}/`
 app.get(`${API_BASE}/`, (req, res) => res.send('Welcome to bankid Api!'));
 app.use(API_BASE, routes());
 

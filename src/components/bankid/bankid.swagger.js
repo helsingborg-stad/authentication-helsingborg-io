@@ -236,7 +236,7 @@ const authAndCollectPath = {
           example: {
             endUserIp: '0.0.0.0',
             personalNumber: '19990929-9999',
-            userVisibleData: "Who's that blonde?",
+            userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=',
           },
         },
       },
@@ -289,7 +289,7 @@ const signAndCollectPath = {
           example: {
             endUserIp: '0.0.0.0',
             personalNumber: '19990929-9999',
-            userVisibleData: "Who's that blonde?",
+            userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=',
           },
         },
       },
