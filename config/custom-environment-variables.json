@@ -3,9 +3,7 @@
     "LEVEL": "LOG_LEVEL"
   },
   "SERVER": {
-    "PORT": "PORT",
-    "CERT": "SERVER_CERT",
-    "KEY": "SERVER_KEY"
+    "PORT": "PORT"
   },
   "BANKID": {
     "CA": "BANKID_CA",

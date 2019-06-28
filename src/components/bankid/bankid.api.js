@@ -1,5 +1,6 @@
 const express = require('express');
 const bankid = require('./bankid.dal');
+const logger = require('../../utils/logger');
 
 const routes = () => {
   const router = express.Router();
@@ -11,19 +12,19 @@ const routes = () => {
 
       return res.json(response);
     } catch (err) {
-      console.log('err', err);
+      logger.info('err', err);
       return res.json(err);
     }
   });
 
   router.post('/authAndCollect', async (req, res) => {
     try {
-      const { endUserIp} = req.body;
-      const response = await bankid.authAndCollect(endUserIp);
+      const { endUserIp, personalNumber } = req.body;
+      const response = await bankid.authAndCollect(endUserIp, personalNumber);
 
       return res.json(response);
     } catch (err) {
-      console.log('err', err);
+      logger.info('err', err);
       return res.json(err);
     }
   });
@@ -31,14 +32,14 @@ const routes = () => {
 
   router.post('/auth', async (req, res) => {
     try {
-      console.log('auth');
-        const { endUserIp, personalNumber } = req.body;
+      logger.info('auth');
+      const { endUserIp, personalNumber } = req.body;
 
       return res.json(
-          await bankid.auth(endUserIp, personalNumber),
+        await bankid.auth(endUserIp, personalNumber),
       );
     } catch (err) {
-      console.log('err', err);
+      logger.info('err', err);
       return res.json(err);
     }
   });
@@ -51,7 +52,7 @@ const routes = () => {
         await bankid.sign(endUserIp, personalNumber, userVisibleData),
       );
     } catch (err) {
-      console.log('err', err);
+      logger.info('err', err);
       return res.json(err);
     }
   });
@@ -64,7 +65,7 @@ const routes = () => {
         await bankid.collect(orderRef),
       );
     } catch (err) {
-      console.log('err', err);
+      logger.info('err', err);
       return res.json(err);
     }
   });
@@ -75,7 +76,7 @@ const routes = () => {
 
       return await bankid.cancel(orderRef);
     } catch (err) {
-      console.log('err', err);
+      logger.info('err', err);
       return res.json(err);
     }
   });

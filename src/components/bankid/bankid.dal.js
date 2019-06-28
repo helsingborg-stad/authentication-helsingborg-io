@@ -4,6 +4,7 @@ const axios = require('axios');
 const https = require('https');
 const fs = require('fs');
 const config = require('config');
+const logger = require('../../utils/logger');
 
 const BANKID_API_URL = config.get('BANKID.API_URL');
 const BANKID_CA = config.get('BANKID.CA');
@@ -23,68 +24,67 @@ const client = axios.create({
   timeout: 5000,
 });
 // Wrapper for all calls to bankId
-const call = (path, payload) => {
-  return client.post(BANKID_API_URL + path, payload)
-    .then((response) => {
-      return response.status === 200
-        ? {
-          status: response.status,
-          data: response.data,
-        }
-        : {
-          status: response.status,
-          message: response.data.details,
-          errorCode: response.data.errorCode,
-        };
-    })
-    .catch((error) => {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      // console.log('error.data', error.response.data);
-      // console.log('error.status', error.response.status);
-      // console.log('error.headers', error.response.headers);
-      if (error.response) return error.response;
+const call = (path, payload) => client.post(BANKID_API_URL + path, payload)
+  .then(response => (response.status === 200
+    ? {
+      status: response.status,
+      data: response.data,
+    }
+    : {
+      status: response.status,
+      message: response.data.details,
+      errorCode: response.data.errorCode,
+    }))
+  .catch((error) => {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    // logger.info('error.data', error.response.data);
+    // logger.info('error.status', error.response.status);
+    // logger.info('error.headers', error.response.headers);
+    if (error.response) return error.response;
 
-      // The request was made but no response was received
-      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-      // http.ClientRequest in node.js
-      if (error.request) console.log(error.request);
-      else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
-    });
-};
-
-const collectUntilDone = (orderRef) => {
-  return new Promise((resolve, reject) => {
-    let counter = 0;
-    const timer = setInterval(async () => {
-      try {
-        counter++;
-        // 5min limit
-        if (counter === 150) {
-          clearInterval(timer);
-        }
-        const collectResponse = await call('/collect', {
-          orderRef,
-        });
-        switch (collectResponse.data.status) {
-          case 'complete':
-            clearInterval(timer);
-            return resolve(collectResponse);
-          case 'failed' :
-            clearInterval(timer);
-            return resolve(collectResponse.hintCode);
-        }
-      } catch (err) {
-        clearInterval(timer);
-        reject(err);
-      }
-    }, 2000);
+    // The request was made but no response was received
+    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+    // http.ClientRequest in node.js
+    if (error.request) logger.info(error.request);
+    else {
+      // Something happened in setting up the request that triggered an Error
+      logger.info('Error', error.message);
+    }
+    logger.info(error.config);
+    return res.status(error.status || 500).json(error);
   });
-};
+
+const collectUntilDone = orderRef => new Promise((resolve, reject) => {
+  let counter = 0;
+  const timer = setInterval(async () => {
+    try {
+      counter += 1;
+      let res;
+      // 5min limit
+      if (counter === 150) {
+        clearInterval(timer);
+      }
+      const collectResponse = await call('/collect', {
+        orderRef,
+      });
+      switch (collectResponse.data.status) {
+        case 'complete':
+          clearInterval(timer);
+          res = resolve(collectResponse);
+          break;
+        case 'failed':
+          clearInterval(timer);
+          res = resolve(collectResponse.hintCode);
+          break;
+      }
+      return res;
+    } catch (err) {
+      clearInterval(timer);
+      return reject(err);
+    }
+  }, 2000);
+});
 
 // Authentication call with Bank Id
 const auth = async (endUserIp, personalNumber) => {
@@ -99,10 +99,11 @@ const auth = async (endUserIp, personalNumber) => {
 
     return await call('/auth', {
       endUserIp,
-      personalNumber
+      personalNumber,
     });
   } catch (error) {
-    console.log('error', error);
+    logger.info('error', error);
+    return res.status(error.status || 500).json(error);
   }
 };
 
@@ -125,7 +126,8 @@ const sign = async (endUserIp, personalNumber, userVisibleData) => {
         : undefined,
     });
   } catch (error) {
-    console.log('error', error);
+    logger.info('error', error);
+    return res.status(error.status || 500).json(error);
   }
 };
 
@@ -144,7 +146,8 @@ const collect = async (orderRef) => {
       orderRef,
     });
   } catch (error) {
-    console.log('error', error);
+    logger.info('error', error);
+    return res.status(error.status || 500).json(error);
   }
 };
 
@@ -164,7 +167,8 @@ const cancel = async (orderRef) => {
       orderRef,
     });
   } catch (error) {
-    console.log('error', error);
+    logger.info('error', error);
+    return res.status(error.status || 500).json(error);
   }
 };
 
@@ -191,12 +195,13 @@ const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
 
     return collectUntilDone(signingResponse.data.orderRef);
   } catch (error) {
-    console.log('error', error);
+    logger.info('error', error);
+    return res.status(error.status || 500).json(error);
   }
 };
 
 // Authenticate and Status Collection call from Bank Id
-const authAndCollect = async (endUserIp) => {
+const authAndCollect = async (endUserIp, personalNumber) => {
   try {
     if (!endUserIp) {
       return {
@@ -206,13 +211,18 @@ const authAndCollect = async (endUserIp) => {
       };
     }
 
-    const authenticationResponse = await call('/auth', {endUserIp: endUserIp.toString()});
+    const authenticationResponse = await call('/auth',
+      {
+        endUserIp: endUserIp.toString(),
+        personalNumber: personalNumber.toString(),
+      });
 
     if (authenticationResponse.status !== 200) return response;
 
     return collectUntilDone(authenticationResponse.data.orderRef);
   } catch (error) {
-    console.log('error', error);
+    logger.info('error', error);
+    return res.status(error.status || 500).json(error);
   }
 };
 

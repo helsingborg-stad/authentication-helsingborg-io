@@ -3,9 +3,7 @@
     "LEVEL": "trace"
   },
   "SERVER": {
-    "PORT": "env_placeholder",
-    "SERVER_CERT": "env_placeholder",
-    "SERVER_KEY": "env_placeholder"
+    "PORT": "env_placeholder"
   },
   "BANKID": {
     "BANKID_CA": "env_placeholder",

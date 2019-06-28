@@ -1,4 +1,5 @@
 const { stringWithLimit } = require('../../../swagger/global.swagger');
+
 const stringObjectRequired = {
   type: 'string',
   required: true,
@@ -24,14 +25,14 @@ const completionDataSchema = {
           surname: {
             ...stringObjectRequired,
           },
-        }
+        },
       },
       device: {
         type: 'object',
         required: true,
         ipAddress: {
           ...stringObjectRequired,
-        }
+        },
       },
       cert: {
         type: 'object',
@@ -41,17 +42,17 @@ const completionDataSchema = {
         },
         notAfter: {
           ...stringObjectRequired,
-        }
+        },
       },
-     signature: {
-       ...stringObjectRequired,
-       format: 'Base64'
-     },
-     ocspResponse: {
-       ...stringObjectRequired,
-       format: 'Base64'
-     }
-    }
+      signature: {
+        ...stringObjectRequired,
+        format: 'Base64',
+      },
+      ocspResponse: {
+        ...stringObjectRequired,
+        format: 'Base64',
+      },
+    },
   },
 };
 const responsesSchema = {
@@ -69,7 +70,7 @@ const responsesSchema = {
     },
     example: {
       orderRef: '131daac9-16c6-4618-beb0-365768f37288',
-      autoStartToken: '7c40b5c9-fa74-49cf-b98c-bfe651f9a7c6'
+      autoStartToken: '7c40b5c9-fa74-49cf-b98c-bfe651f9a7c6',
     },
   },
   pendingCollectResponse: {
@@ -91,7 +92,7 @@ const responsesSchema = {
     example: {
       orderRef: '131daac9-16c6-4618-beb0-365768f37288',
       status: 'pending',
-      hintCode: 'userSign'
+      hintCode: 'userSign',
     },
   },
   failedCollectResponse: {
@@ -113,7 +114,7 @@ const responsesSchema = {
     example: {
       orderRef: '131daac9-16c6-4618-beb0-365768f37288',
       status: 'failed',
-      hintCode: 'userCancel'
+      hintCode: 'userCancel',
     },
   },
   completedCollectResponse: {
@@ -127,28 +128,28 @@ const responsesSchema = {
         type: 'string',
         required: true,
       },
-      ...completionDataSchema ,
+      ...completionDataSchema,
     },
     example: {
-     orderRef: '131daac9-16c6-4618-beb0-365768f37288',
-     status: 'complete',
-     completionData: {
-       user: {
-         personalNumber: '190000000000',
-         name: 'Karl Karlsson',
-         givenName: 'Karl',
-         surname: 'Karlsson'
+      orderRef: '131daac9-16c6-4618-beb0-365768f37288',
+      status: 'complete',
+      completionData: {
+        user: {
+          personalNumber: '190000000000',
+          name: 'Karl Karlsson',
+          givenName: 'Karl',
+          surname: 'Karlsson',
         },
-       device: {
-        ipAddress: '192.168.0.1'
+        device: {
+          ipAddress: '192.168.0.1',
         },
-       cert: {
-         notBefore: '1502983274000',
-         notAfter: '1563549674000'
+        cert: {
+          notBefore: '1502983274000',
+          notAfter: '1563549674000',
         },
-       signature: '<base64-encoded data>',
-       ocspResponse: '<base64-encoded data>'
-      }
+        signature: '<base64-encoded data>',
+        ocspResponse: '<base64-encoded data>',
+      },
     },
   },
 };
@@ -182,7 +183,7 @@ const authPath = {
           example: {
             endUserIp: '194.168.2.25',
             personalNumber: '190000000000',
-            userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ='
+            userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=',
           },
         },
       },
@@ -340,7 +341,7 @@ const signPath = {
           example: {
             endUserIp: '194.168.2.25',
             personalNumber: '190000000000',
-            userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ='
+            userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=',
           },
         },
       },
@@ -379,7 +380,7 @@ const collectPath = {
           properties: {
             orderRef: {
               required: true,
-              type: 'string'
+              type: 'string',
             },
           },
           example: {
@@ -429,7 +430,7 @@ const cancelPath = {
             orderRef: {
               required: true,
               ...stringWithLimit(1, 32),
-            }
+            },
           },
           example: {
             orderRef: '131daac9-16c6-4618-beb0-365768f37288',
