@@ -1,0 +1,14 @@
+{
+  "LOG": {
+    "LEVEL": "LOG_LEVEL"
+  },
+  "SERVER": {
+    "PORT": "PORT"
+  },
+  "BANKID": {
+    "CA": "BANKID_CA",
+    "PFX_PATH":"BANKID_PFX_PATH",
+    "API_URL": "BANKID_API_URL",
+    "PASSPHRASE": "BANKID_PASSPHRASE"
+  }
+}

@@ -1,9 +1,0 @@
-SERVERCERT="../../localConfig/server.cert"
-SERVERKEY="../../localConfig/server.key"
-komACrt="../../localConfig/KommunA.crt"
-komAKey="../../localConfig/KommunA.key"
-passphrase="8017644482212111"
-PORT="3320"
-
-NAVETURL="https://localhost:3320/getPerson/"
-BANKIDURL="https://localhost:3310/bankid/"

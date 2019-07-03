@@ -1,0 +1,14 @@
+{
+  "LOG": {
+    "LEVEL": "trace"
+  },
+  "SERVER": {
+    "PORT": "env_placeholder"
+  },
+  "BANKID": {
+    "BANKID_CA": "env_placeholder",
+    "BANKID_PFX_PATH":"env_placeholder",
+    "BANKID_API_URL": "env_placeholder",
+    "BANKID_PASSPHRASE": "env_placeholder"
+  }
+}
