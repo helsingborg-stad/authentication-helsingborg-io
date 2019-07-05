@@ -34,9 +34,10 @@ const routes = () => {
     try {
       logger.info('auth');
       const { endUserIp, personalNumber } = req.body;
-
+      const userAuth = bankid.auth(endUserIp, personalNumber);
       return res.json(
-        await bankid.auth(endUserIp, personalNumber),
+        ...req.body,
+        userAuth,
       );
     } catch (err) {
       logger.info('err', err);
@@ -47,9 +48,11 @@ const routes = () => {
   router.post('/sign', async (req, res) => {
     try {
       const { endUserIp, personalNumber, userVisibleData } = req.body;
+      const userSign = await bankid.sign(endUserIp, personalNumber, userVisibleData);
 
       return res.json(
-        await bankid.sign(endUserIp, personalNumber, userVisibleData),
+        ...req.body,
+        userSign,
       );
     } catch (err) {
       logger.info('err', err);
