@@ -49,7 +49,6 @@ const routes = () => {
       const userSign = await bankid.sign(endUserIp, personalNumber, userVisibleData);
 
       return res.json(
-        ...req.body,
         userSign,
       );
     } catch (err) {
