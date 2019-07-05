@@ -29,14 +29,12 @@ const routes = () => {
     }
   });
 
-
   router.post('/auth', async (req, res) => {
     try {
       logger.info('auth');
       const { endUserIp, personalNumber } = req.body;
-      const userAuth = bankid.auth(endUserIp, personalNumber);
+      const userAuth = await bankid.auth(endUserIp, personalNumber);
       return res.json(
-        ...req.body,
         userAuth,
       );
     } catch (err) {
