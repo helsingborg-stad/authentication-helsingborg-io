@@ -2,19 +2,17 @@
 /* eslint-disable no-undef */
 const axios = require('axios');
 const https = require('https');
-const fs = require('fs');
-const config = require('config');
 const logger = require('../../utils/logger');
 
-const BANKID_API_URL = config.get('BANKID.API_URL');
-const BANKID_CA = config.get('BANKID.CA');
-const BANKID_PFX_PATH = config.get('BANKID.PFX_PATH');
-const BANKID_PASSPHRASE = config.get('BANKID.PASSPHRASE');
+const BANKID_CA = process.env.BANKID_CA_STRING;
+const BANKID_API_URL = process.env.BANKID_API_URL;
+const BANKID_PASSPHRASE = process.env.BANKID_PASSPHRASE;
+const BANKID_PFX_BASE64 = new Buffer(process.env.BANKID_PFX_BASE64, 'base64');    // Stored as an base64 converted env variable.
 
 const client = axios.create({
   httpsAgent: new https.Agent({
     ca: BANKID_CA,
-    pfx: fs.readFileSync(BANKID_PFX_PATH),
+    pfx: BANKID_PFX_BASE64,
     passphrase: BANKID_PASSPHRASE,
     rejectUnauthorized: false,
   }),
