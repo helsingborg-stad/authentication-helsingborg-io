@@ -14,8 +14,10 @@ The specific .env-parameters required for these projects are:
    PORT=3004 #(or any other port you prefer)
    LOG_LEVEL=info #(trace, debug, info, warn, error, fatal, silent)
 
-  - BANKID_CA (path to the ca-file for bankid)
-  - BANKID_PFX_PATH (path to the pfx-file for bankid) 
+  - BANKID_CA (path to the ca-file for bankid, depricated use BANKID_CA_STRING!)
+  - BANKID_CA_STRING (ca-file as env. string)
+  - BANKID_PFX_PATH (path to the pfx-file for bankid, depricated use BANKID_PFX_BASE64!) 
+  - BANKID_PFX_BASE64 (pfx-file as base64 string)
   - BANKID_API_URL (url for the bankid api)
   - BANKID_PASSPHRASE (passphrase for the bankid api)
 ````
