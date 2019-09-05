@@ -31,7 +31,6 @@ const routes = () => {
 
   router.post('/auth', async (req, res) => {
     try {
-      logger.info('auth');
       const { endUserIp, personalNumber } = req.body;
       const userAuth = await bankid.auth(endUserIp, personalNumber);
       return res.json(
