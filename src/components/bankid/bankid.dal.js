@@ -162,10 +162,19 @@ const cancel = async (orderRef) => {
         errorCode: 'invalidParameters',
       };
     }
-
-    return await call('/cancel', {
+    const result = await call('/cancel', {
       orderRef,
     });
+
+    if (result.status === 200) {
+      result.data = {
+        ...result.data,
+        hitCode: 'userCancel',
+        message: 'Cancellation success',
+      };
+    }
+
+    return result;
   } catch (error) {
     logger.info('error', error);
     return res.status(error.status || 500).json(error);
