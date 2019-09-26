@@ -3,11 +3,12 @@
 const axios = require('axios');
 const https = require('https');
 const logger = require('../../utils/logger');
+const jsonapi = require('../../jsonapi');
 
 const BANKID_CA = process.env.BANKID_CA_STRING;
-const BANKID_API_URL = process.env.BANKID_API_URL;
-const BANKID_PASSPHRASE = process.env.BANKID_PASSPHRASE;
-const BANKID_PFX_BASE64 = new Buffer(process.env.BANKID_PFX_BASE64, 'base64');    // Stored as an base64 converted env variable.
+const { BANKID_API_URL } = process.env;
+const { BANKID_PASSPHRASE } = process.env;
+const BANKID_PFX_BASE64 = new Buffer(process.env.BANKID_PFX_BASE64, 'base64'); // Stored as an base64 converted env variable.
 
 const client = axios.create({
   httpsAgent: new https.Agent({
@@ -84,9 +85,16 @@ const collectUntilDone = orderRef => new Promise((resolve, reject) => {
   }, 2000);
 });
 
+
+/**
+ * CREATE RESOURCE METHODS
+ */
+
 // Authentication call with Bank Id
-const auth = async (endUserIp, personalNumber) => {
+const auth = async (req, res) => {
   try {
+    const { endUserIp, personalNumber } = req.body;
+
     if (!endUserIp) {
       return {
         status: 400,
@@ -95,19 +103,27 @@ const auth = async (endUserIp, personalNumber) => {
       };
     }
 
-    return await call('/auth', {
+    const resourceData = await call('/auth', {
       endUserIp,
       personalNumber,
     });
+
+    const convertData = jsonapi.convert.apiResponse(resourceData);
+    const response = jsonapi.serializer.serialize('auth', convertData);
+
+    return response;
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    logger.error(error);
+    const errorResponse = await jsonapi.serializer.serializeError(error);
+    return res.status(error.status).json(errorResponse);
   }
 };
 
 // Signature call with Bank Id
-const sign = async (endUserIp, personalNumber, userVisibleData) => {
+const sign = async (req, res) => {
   try {
+    const { endUserIp, personalNumber, userVisibleData } = req.body;
+
     if (!endUserIp) {
       return {
         status: 400,
@@ -116,22 +132,39 @@ const sign = async (endUserIp, personalNumber, userVisibleData) => {
       };
     }
 
-    return await call('/sign', {
+    const resourceData = await call('/sign', {
       personalNumber: personalNumber.toString(),
       endUserIp: endUserIp.toString(),
       userVisibleData: userVisibleData
         ? Buffer.from(userVisibleData).toString('base64')
         : undefined,
     });
+
+    const convertData = jsonapi.convert.apiResponse(resourceData);
+    const response = jsonapi.serializer.serialize('auth', convertData);
+
+    return response;
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    logger.error(error);
+    const errorResponse = await jsonapi.serializer.serializeError(error);
+    return res.status(error.status).json(errorResponse);
   }
 };
 
-// Collect call with Bank Id
-const collect = async (orderRef) => {
+const create = {
+  auth,
+  sign,
+};
+
+/**
+ * READ RESOURCE METHODS
+ */
+
+const collect = async (req, res) => {
+  // Write method for reading a resource (in this case a get request towards the testapi)
   try {
+    const { orderRef } = req.body;
+
     if (!orderRef) {
       return {
         status: 400,
@@ -140,15 +173,24 @@ const collect = async (orderRef) => {
       };
     }
 
-    return await call('/collect', {
+    const resourceData = await call('/collect', {
       orderRef,
     });
+
+    const convertData = jsonapi.convert.apiResponse(resourceData);
+    const response = jsonapi.serializer.serialize('collect', convertData);
+
+    return response;
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    logger.error(error);
+    const errorResponse = await jsonapi.serializer.serializeError(error);
+    return res.status(error.status).json(errorResponse);
   }
 };
 
+const read = {
+  collect,
+};
 
 // Cancel call with Bank Id
 const cancel = async (orderRef) => {
@@ -225,10 +267,17 @@ const authAndCollect = async (endUserIp, personalNumber) => {
 };
 
 module.exports = {
-  auth,
-  sign,
-  collect,
+  create,
+  read,
   cancel,
   signAndCollect,
   authAndCollect,
 };
+
+// NEW
+// module.exports = {
+//     create,
+//     read,
+//     update,
+//     del,
+// };
