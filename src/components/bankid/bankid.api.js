@@ -1,9 +1,21 @@
 const express = require('express');
 const bankid = require('./bankid.dal');
 const logger = require('../../utils/logger');
+const pjson = require('../../../package.json');
 
 const routes = () => {
   const router = express.Router();
+
+  router.get('/', async (req, res) => res.json({
+    jsonapi: {
+      version: '1.0',
+      meta: {
+        service: pjson.name,
+        owner: 'Helsingborg Stad',
+        description: pjson.description,
+      },
+    },
+  }));
 
   router.post('/signAndCollect', async (req, res) => {
     try {
@@ -40,19 +52,13 @@ const routes = () => {
   });
 
   router.post('/collect', async (req, res) => {
-    const response = await bankid.read.collect(req, res);
+    const response = await bankid.read.order(req, res);
     return res.json(response);
   });
 
-  router.post('/cancel', async (req, res) => {
-    try {
-      const { orderRef } = req.body;
-
-      return await bankid.cancel(orderRef);
-    } catch (err) {
-      logger.info('err', err);
-      return res.json(err);
-    }
+  router.delete('/cancel', async (req, res) => {
+    const response = await bankid.del.order(req, res);
+    return res.json(response);
   });
 
   return router;

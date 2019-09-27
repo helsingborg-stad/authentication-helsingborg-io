@@ -4,6 +4,7 @@ const axios = require('axios');
 const https = require('https');
 const logger = require('../../utils/logger');
 const jsonapi = require('../../jsonapi');
+const { BadRequestError, ResourceNotFoundError } = require('../../utils/error');
 
 const BANKID_CA = process.env.BANKID_CA_STRING;
 const { BANKID_API_URL } = process.env;
@@ -96,11 +97,7 @@ const auth = async (req, res) => {
     const { endUserIp, personalNumber } = req.body;
 
     if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
+      throw new BadRequestError('Missing required arguments: endUserIp.');
     }
 
     const resourceData = await call('/auth', {
@@ -108,8 +105,7 @@ const auth = async (req, res) => {
       personalNumber,
     });
 
-    const convertData = jsonapi.convert.apiResponse(resourceData);
-    const response = jsonapi.serializer.serialize('auth', convertData);
+    const response = jsonapi.serializer.serialize('auth', resourceData.data);
 
     return response;
   } catch (error) {
@@ -125,11 +121,7 @@ const sign = async (req, res) => {
     const { endUserIp, personalNumber, userVisibleData } = req.body;
 
     if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
+      throw new BadRequestError('Missing required arguments: endUserIp.');
     }
 
     const resourceData = await call('/sign', {
@@ -140,8 +132,7 @@ const sign = async (req, res) => {
         : undefined,
     });
 
-    const convertData = jsonapi.convert.apiResponse(resourceData);
-    const response = jsonapi.serializer.serialize('auth', convertData);
+    const response = jsonapi.serializer.serialize('auth', resourceData.data);
 
     return response;
   } catch (error) {
@@ -166,19 +157,14 @@ const collect = async (req, res) => {
     const { orderRef } = req.body;
 
     if (!orderRef) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: orderRef.',
-        errorCode: 'invalidParameters',
-      };
+      throw new BadRequestError('Missing required arguments: orderRef.');
     }
 
     const resourceData = await call('/collect', {
       orderRef,
     });
 
-    const convertData = jsonapi.convert.apiResponse(resourceData);
-    const response = jsonapi.serializer.serialize('collect', convertData);
+    const response = jsonapi.serializer.serialize('collect', resourceData.data);
 
     return response;
   } catch (error) {
@@ -189,27 +175,39 @@ const collect = async (req, res) => {
 };
 
 const read = {
-  collect,
+  order: collect,
 };
 
+
+/**
+ * DELETE RESOURCE METHODS
+ */
+
 // Cancel call with Bank Id
-const cancel = async (orderRef) => {
+const cancel = async (req, res) => {
   try {
+    const { orderRef } = req.body;
+
     if (!orderRef) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: orderRef.',
-        errorCode: 'invalidParameters',
-      };
+      throw new BadRequestError('Missing required arguments: orderRef.');
     }
 
-    return await call('/cancel', {
+    const resourceData = await call('/cancel', {
       orderRef,
     });
+
+    const response = jsonapi.serializer.serialize('cancel', resourceData);
+
+    return response;
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    logger.error(error);
+    const errorResponse = await jsonapi.serializer.serializeError(error);
+    return res.status(error.status).json(errorResponse);
   }
+};
+
+const del = {
+  order: cancel,
 };
 
 // Signature and Status Collection call from Bank Id
@@ -269,15 +267,7 @@ const authAndCollect = async (endUserIp, personalNumber) => {
 module.exports = {
   create,
   read,
-  cancel,
+  del,
   signAndCollect,
   authAndCollect,
 };
-
-// NEW
-// module.exports = {
-//     create,
-//     read,
-//     update,
-//     del,
-// };
