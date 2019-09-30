@@ -1,6 +1,5 @@
-const { BASE_URL } = process.env;
 const signJsonApiSchema = {
-
+  id: 'id',
 };
 
 module.exports = signJsonApiSchema;

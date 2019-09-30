@@ -105,7 +105,12 @@ const auth = async (req, res) => {
       personalNumber,
     });
 
-    const response = jsonapi.serializer.serialize('auth', resourceData.data);
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    const convertData = jsonapi.convert.createId(resourceData.data);
+    const response = jsonapi.serializer.serialize('auth', convertData);
 
     return response;
   } catch (error) {
@@ -120,19 +125,20 @@ const sign = async (req, res) => {
   try {
     const { endUserIp, personalNumber, userVisibleData } = req.body;
 
-    if (!endUserIp) {
-      throw new BadRequestError('Missing required arguments: endUserIp.');
-    }
-
     const resourceData = await call('/sign', {
-      personalNumber: personalNumber.toString(),
-      endUserIp: endUserIp.toString(),
+      personalNumber: personalNumber ? personalNumber.toString() : undefined,
+      endUserIp: endUserIp ? endUserIp.toString() : undefined,
       userVisibleData: userVisibleData
         ? Buffer.from(userVisibleData).toString('base64')
         : undefined,
     });
 
-    const response = jsonapi.serializer.serialize('auth', resourceData.data);
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    const convertData = jsonapi.convert.createId(resourceData.data);
+    const response = jsonapi.serializer.serialize('sign', convertData);
 
     return response;
   } catch (error) {
@@ -164,7 +170,12 @@ const collect = async (req, res) => {
       orderRef,
     });
 
-    const response = jsonapi.serializer.serialize('collect', resourceData.data);
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    const convertData = jsonapi.convert.createId(resourceData.data);
+    const response = jsonapi.serializer.serialize('collect', convertData);
 
     return response;
   } catch (error) {
@@ -196,7 +207,12 @@ const cancel = async (req, res) => {
       orderRef,
     });
 
-    const response = jsonapi.serializer.serialize('cancel', resourceData);
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    const convertData = jsonapi.convert.createId(resourceData.data);
+    const response = jsonapi.serializer.serialize('cancel', convertData);
 
     return response;
   } catch (error) {

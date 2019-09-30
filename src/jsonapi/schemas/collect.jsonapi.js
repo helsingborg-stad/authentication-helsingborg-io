@@ -1,6 +1,5 @@
-const { BASE_URL } = process.env;
 const collectJsonApiSchema = {
-
+  id: 'id',
 };
 
 module.exports = collectJsonApiSchema;
