@@ -55,38 +55,6 @@ const call = (path, payload) => client.post(BANKID_API_URL + path, payload)
     return res.status(error.status || 500).json(error);
   });
 
-const collectUntilDone = orderRef => new Promise((resolve, reject) => {
-  let counter = 0;
-  const timer = setInterval(async () => {
-    try {
-      counter += 1;
-      let res;
-      // 5min limit
-      if (counter === 150) {
-        clearInterval(timer);
-      }
-      const collectResponse = await call('/collect', {
-        orderRef,
-      });
-      switch (collectResponse.data.status) {
-        case 'complete':
-          clearInterval(timer);
-          res = resolve(collectResponse);
-          break;
-        case 'failed':
-          clearInterval(timer);
-          res = resolve(collectResponse.hintCode);
-          break;
-      }
-      return res;
-    } catch (err) {
-      clearInterval(timer);
-      return reject(err);
-    }
-  }, 2000);
-});
-
-
 /**
  * CREATE RESOURCE METHODS
  */
@@ -226,64 +194,8 @@ const del = {
   order: cancel,
 };
 
-// Signature and Status Collection call from Bank Id
-const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
-  try {
-    if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
-    }
-
-    const signingResponse = await call('/sign', {
-      personalNumber: personalNumber.toString(),
-      endUserIp: endUserIp.toString(),
-      userVisibleData: userVisibleData
-        ? Buffer.from(userVisibleData).toString('base64')
-        : undefined,
-    });
-
-    if (signingResponse.status !== 200) return response;
-
-    return collectUntilDone(signingResponse.data.orderRef);
-  } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
-  }
-};
-
-// Authenticate and Status Collection call from Bank Id
-const authAndCollect = async (endUserIp, personalNumber) => {
-  try {
-    if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
-    }
-
-    const authenticationResponse = await call('/auth',
-      {
-        endUserIp: endUserIp.toString(),
-        personalNumber: personalNumber.toString(),
-      });
-
-    if (authenticationResponse.status !== 200) return response;
-
-    return collectUntilDone(authenticationResponse.data.orderRef);
-  } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
-  }
-};
-
 module.exports = {
   create,
   read,
   del,
-  signAndCollect,
-  authAndCollect,
 };
