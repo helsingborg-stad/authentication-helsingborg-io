@@ -15,26 +15,10 @@ const routes = () => {
       },
     },
   }));
-
-  router.post('/auth', async (req, res) => {
-    const response = await bankid.create.auth(req, res);
-    return res.json(response);
-  });
-
-  router.post('/sign', async (req, res) => {
-    const response = await bankid.create.sign(req, res);
-    return res.json(response);
-  });
-
-  router.post('/collect', async (req, res) => {
-    const response = await bankid.read.order(req, res);
-    return res.json(response);
-  });
-
-  router.delete('/cancel', async (req, res) => {
-    const response = await bankid.del.order(req, res);
-    return res.json(response);
-  });
+  router.post('/auth', async (req, res) => bankid.create.auth(req, res));
+  router.post('/sign', async (req, res) => bankid.create.sign(req, res));
+  router.post('/collect', async (req, res) => bankid.read.order(req, res));
+  router.delete('/cancel', async (req, res) => bankid.del.order(req, res));
 
   return router;
 };
