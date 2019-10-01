@@ -3,11 +3,13 @@
 const axios = require('axios');
 const https = require('https');
 const logger = require('../../utils/logger');
+const jsonapi = require('../../jsonapi');
+const { BadRequestError } = require('../../utils/error');
 
 const BANKID_CA = process.env.BANKID_CA_STRING;
-const BANKID_API_URL = process.env.BANKID_API_URL;
-const BANKID_PASSPHRASE = process.env.BANKID_PASSPHRASE;
-const BANKID_PFX_BASE64 = new Buffer(process.env.BANKID_PFX_BASE64, 'base64');    // Stored as an base64 converted env variable.
+const { BANKID_API_URL } = process.env;
+const { BANKID_PASSPHRASE } = process.env;
+const BANKID_PFX_BASE64 = new Buffer(process.env.BANKID_PFX_BASE64, 'base64'); // Stored as an base64 converted env variable.
 
 const client = axios.create({
   httpsAgent: new https.Agent({
@@ -53,182 +55,130 @@ const call = (path, payload) => client.post(BANKID_API_URL + path, payload)
     return res.status(error.status || 500).json(error);
   });
 
-const collectUntilDone = orderRef => new Promise((resolve, reject) => {
-  let counter = 0;
-  const timer = setInterval(async () => {
-    try {
-      counter += 1;
-      let res;
-      // 5min limit
-      if (counter === 150) {
-        clearInterval(timer);
-      }
-      const collectResponse = await call('/collect', {
-        orderRef,
-      });
-      switch (collectResponse.data.status) {
-        case 'complete':
-          clearInterval(timer);
-          res = resolve(collectResponse);
-          break;
-        case 'failed':
-          clearInterval(timer);
-          res = resolve(collectResponse.hintCode);
-          break;
-      }
-      return res;
-    } catch (err) {
-      clearInterval(timer);
-      return reject(err);
-    }
-  }, 2000);
-});
+const createErrorResponse = async (error, res) => {
+  logger.error(error);
+  const serializedData = await jsonapi.serializer.serializeError(error);
+  return res.status(error.status).json(serializedData);
+};
+
+const createSuccessResponse = async (data, res, jsonapiType, converter) => {
+  const convertData = await jsonapi.convert[converter](data);
+  const serializedData = await jsonapi.serializer.serialize(jsonapiType, convertData);
+  return res.json(serializedData);
+};
+
+/**
+ * CREATE RESOURCE METHODS
+ */
 
 // Authentication call with Bank Id
-const auth = async (endUserIp, personalNumber) => {
+const auth = async (req, res) => {
   try {
-    if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
-    }
+    const { endUserIp, personalNumber } = req.body;
 
-    return await call('/auth', {
+    const resourceData = await call('/auth', {
       endUserIp,
       personalNumber,
     });
+
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    return await createSuccessResponse(resourceData.data, res, 'auth', 'createId');
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    return createErrorResponse(error, res);
   }
 };
 
 // Signature call with Bank Id
-const sign = async (endUserIp, personalNumber, userVisibleData) => {
+const sign = async (req, res) => {
   try {
-    if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
-    }
+    const { endUserIp, personalNumber, userVisibleData } = req.body;
 
-    return await call('/sign', {
-      personalNumber: personalNumber.toString(),
-      endUserIp: endUserIp.toString(),
+    const resourceData = await call('/sign', {
+      personalNumber: personalNumber ? personalNumber.toString() : undefined,
+      endUserIp: endUserIp ? endUserIp.toString() : undefined,
       userVisibleData: userVisibleData
         ? Buffer.from(userVisibleData).toString('base64')
         : undefined,
     });
-  } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
-  }
-};
 
-// Collect call with Bank Id
-const collect = async (orderRef) => {
-  try {
-    if (!orderRef) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: orderRef.',
-        errorCode: 'invalidParameters',
-      };
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
     }
 
-    return await call('/collect', {
-      orderRef,
-    });
+    return await createSuccessResponse(resourceData.data, res, 'sign', 'createId');
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    return createErrorResponse(error, res);
   }
 };
 
+const create = {
+  auth,
+  sign,
+};
+
+/**
+ * READ RESOURCE METHODS
+ */
+
+const collect = async (req, res) => {
+  // Write method for reading a resource (in this case a get request towards the testapi)
+  try {
+    const { orderRef } = req.body;
+
+    const resourceData = await call('/collect', {
+      orderRef,
+    });
+
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    return await createSuccessResponse(resourceData.data, res, 'collect', 'createId');
+  } catch (error) {
+    return createErrorResponse(error, res);
+  }
+};
+
+const read = {
+  order: collect,
+};
+
+/**
+ * DELETE RESOURCE METHODS
+ */
 
 // Cancel call with Bank Id
-const cancel = async (orderRef) => {
+const cancel = async (req, res) => {
   try {
+    const { orderRef } = req.body;
+
     if (!orderRef) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: orderRef.',
-        errorCode: 'invalidParameters',
-      };
+      throw new BadRequestError('Missing required arguments: orderRef.');
     }
 
-    return await call('/cancel', {
+    const resourceData = await call('/cancel', {
       orderRef,
     });
+
+    if (resourceData.status === 400) {
+      throw new BadRequestError(resourceData.data.details);
+    }
+
+    return await createSuccessResponse(resourceData.data, res, 'cancel', 'createId');
   } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
+    return createErrorResponse(error, res);
   }
 };
 
-// Signature and Status Collection call from Bank Id
-const signAndCollect = async (endUserIp, personalNumber, userVisibleData) => {
-  try {
-    if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
-    }
-
-    const signingResponse = await call('/sign', {
-      personalNumber: personalNumber.toString(),
-      endUserIp: endUserIp.toString(),
-      userVisibleData: userVisibleData
-        ? Buffer.from(userVisibleData).toString('base64')
-        : undefined,
-    });
-
-    if (signingResponse.status !== 200) return response;
-
-    return collectUntilDone(signingResponse.data.orderRef);
-  } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
-  }
-};
-
-// Authenticate and Status Collection call from Bank Id
-const authAndCollect = async (endUserIp, personalNumber) => {
-  try {
-    if (!endUserIp) {
-      return {
-        status: 400,
-        message: 'Missing required arguments: endUserIp.',
-        errorCode: 'invalidParameters',
-      };
-    }
-
-    const authenticationResponse = await call('/auth',
-      {
-        endUserIp: endUserIp.toString(),
-        personalNumber: personalNumber.toString(),
-      });
-
-    if (authenticationResponse.status !== 200) return response;
-
-    return collectUntilDone(authenticationResponse.data.orderRef);
-  } catch (error) {
-    logger.info('error', error);
-    return res.status(error.status || 500).json(error);
-  }
+const del = {
+  order: cancel,
 };
 
 module.exports = {
-  auth,
-  sign,
-  collect,
-  cancel,
-  signAndCollect,
-  authAndCollect,
+  create,
+  read,
+  del,
 };
