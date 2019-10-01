@@ -4,7 +4,7 @@ const axios = require('axios');
 const https = require('https');
 const logger = require('../../utils/logger');
 const jsonapi = require('../../jsonapi');
-const { BadRequestError, ResourceNotFoundError } = require('../../utils/error');
+const { BadRequestError } = require('../../utils/error');
 
 const BANKID_CA = process.env.BANKID_CA_STRING;
 const { BANKID_API_URL } = process.env;
@@ -55,6 +55,18 @@ const call = (path, payload) => client.post(BANKID_API_URL + path, payload)
     return res.status(error.status || 500).json(error);
   });
 
+const createErrorResponse = async (error, res) => {
+  logger.error(error);
+  const serializedData = await jsonapi.serializer.serializeError(error);
+  return res.status(error.status).json(serializedData);
+};
+
+const createSuccessResponse = async (data, res, jsonapiType, converter) => {
+  const convertData = await jsonapi.convert[converter](data);
+  const serializedData = await jsonapi.serializer.serialize(jsonapiType, convertData);
+  return res.json(serializedData);
+};
+
 /**
  * CREATE RESOURCE METHODS
  */
@@ -63,10 +75,6 @@ const call = (path, payload) => client.post(BANKID_API_URL + path, payload)
 const auth = async (req, res) => {
   try {
     const { endUserIp, personalNumber } = req.body;
-
-    if (!endUserIp) {
-      throw new BadRequestError('Missing required arguments: endUserIp.');
-    }
 
     const resourceData = await call('/auth', {
       endUserIp,
@@ -77,14 +85,9 @@ const auth = async (req, res) => {
       throw new BadRequestError(resourceData.data.details);
     }
 
-    const convertData = jsonapi.convert.createId(resourceData.data);
-    const response = jsonapi.serializer.serialize('auth', convertData);
-
-    return response;
+    return await createSuccessResponse(resourceData.data, res, 'auth', 'createId');
   } catch (error) {
-    logger.error(error);
-    const errorResponse = await jsonapi.serializer.serializeError(error);
-    return res.status(error.status).json(errorResponse);
+    return createErrorResponse(error, res);
   }
 };
 
@@ -105,14 +108,9 @@ const sign = async (req, res) => {
       throw new BadRequestError(resourceData.data.details);
     }
 
-    const convertData = jsonapi.convert.createId(resourceData.data);
-    const response = jsonapi.serializer.serialize('sign', convertData);
-
-    return response;
+    return await createSuccessResponse(resourceData.data, res, 'sign', 'createId');
   } catch (error) {
-    logger.error(error);
-    const errorResponse = await jsonapi.serializer.serializeError(error);
-    return res.status(error.status).json(errorResponse);
+    return createErrorResponse(error, res);
   }
 };
 
@@ -130,10 +128,6 @@ const collect = async (req, res) => {
   try {
     const { orderRef } = req.body;
 
-    if (!orderRef) {
-      throw new BadRequestError('Missing required arguments: orderRef.');
-    }
-
     const resourceData = await call('/collect', {
       orderRef,
     });
@@ -142,21 +136,15 @@ const collect = async (req, res) => {
       throw new BadRequestError(resourceData.data.details);
     }
 
-    const convertData = jsonapi.convert.createId(resourceData.data);
-    const response = jsonapi.serializer.serialize('collect', convertData);
-
-    return response;
+    return await createSuccessResponse(resourceData.data, res, 'collect', 'createId');
   } catch (error) {
-    logger.error(error);
-    const errorResponse = await jsonapi.serializer.serializeError(error);
-    return res.status(error.status).json(errorResponse);
+    return createErrorResponse(error, res);
   }
 };
 
 const read = {
   order: collect,
 };
-
 
 /**
  * DELETE RESOURCE METHODS
@@ -179,14 +167,9 @@ const cancel = async (req, res) => {
       throw new BadRequestError(resourceData.data.details);
     }
 
-    const convertData = jsonapi.convert.createId(resourceData.data);
-    const response = jsonapi.serializer.serialize('cancel', convertData);
-
-    return response;
+    return await createSuccessResponse(resourceData.data, res, 'cancel', 'createId');
   } catch (error) {
-    logger.error(error);
-    const errorResponse = await jsonapi.serializer.serializeError(error);
-    return res.status(error.status).json(errorResponse);
+    return createErrorResponse(error, res);
   }
 };
 
