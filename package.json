@@ -39,7 +39,6 @@
         "express-pino-logger": "^4.0.0",
         "fs": "0.0.1-security",
         "json-api-serializer": "^2.1.0",
-        "knex": "^0.17.1",
         "mysql": "^2.17.1",
         "pino": "^5.12.5",
         "redis": "^2.8.0",
