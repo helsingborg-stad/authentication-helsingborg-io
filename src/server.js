@@ -1,5 +1,4 @@
 const express = require('express');
-const config = require('config');
 const pino = require('express-pino-logger');
 const swaggerUi = require('swagger-ui-express');
 const bodyParser = require('body-parser');
@@ -9,7 +8,7 @@ const logger = require('./utils/logger');
 
 
 // Config
-const SERVER_PORT = process.env.PORT || config.get('SERVER.PORT');
+const SERVER_PORT = process.env.PORT;
 const API_BASE = '/api/v1';
 
 
