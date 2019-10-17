@@ -1,3 +1,6 @@
+/* eslint-disable global-require */
+require('dotenv').config();
+
 const express = require('express');
 const pino = require('express-pino-logger');
 const swaggerUi = require('swagger-ui-express');
