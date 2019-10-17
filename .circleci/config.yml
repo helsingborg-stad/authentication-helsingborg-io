@@ -13,8 +13,11 @@
 #
 # 1. Create a git repository.
 # 2. Link the git repository to circle ci
-# 4. Create a heroku container repository
-# 5. Run the build
+# 3. Go to "Checkout SSH keys in circleci"
+# 4. Add new checkout key and verify account access
+# 5. Create a heroku container repository
+# 6. Enable deploy via status api on heroku
+# 7. Push branch to github
 #
 # More detailed information on how to complete this and enviroment
 # variables can be found in internal confluence documentation.
@@ -30,6 +33,84 @@ executors:
       - image: circleci/buildpack-deps:stretch
 
 jobs:
+  lint:
+    working_directory: ~/application
+    docker:
+      - image: circleci/node:12.3.1
+    steps:
+      # Check out the code in the project directory.
+      - checkout
+
+      - restore_cache:
+          key: lint-v1-{{ checksum "package.json" }}-{{ arch }}
+
+      - run:
+          name: Install depencencys
+          command: npm install
+
+      - save_cache:
+          key: lint-v1-{{ checksum "package.json" }}-{{ arch }}
+          paths:
+            - node_modules
+
+      - run:
+          name: Running eslint
+          command: |
+            mkdir -p test-results/eslint
+            npm run lint
+          when: always
+
+      # Persist temporary files (stored up to 30 days).
+      - persist_to_workspace:
+          root: ~/application
+          paths:
+            - node_modules
+
+      - store_test_results:
+          path: test-results/eslint
+
+      - store_artifacts:
+          path: test-results/eslint
+
+  unit:
+    working_directory: ~/application
+    docker:
+      - image: circleci/node:12.3.1
+    steps:
+      # Check out the code in the project directory.
+      - checkout
+
+      - restore_cache:
+          key: unit-v1-{{ checksum "package.json" }}-{{ arch }}
+
+      - run:
+          name: Install depencencys
+          command: npm install
+
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+          paths:
+            - node_modules
+      - run:
+          name: Run application tests (mocha)
+          command: |
+            mkdir -p test-results/unit
+            npm run test
+
+      # Persist temporary files (stored up to 30 days).
+      - persist_to_workspace:
+          root: ~/application
+          paths:
+            - node_modules
+
+      # Store logs.
+      - store_test_results:
+          path: test-results/unit
+
+      # Store artifacts (example logs, binaries, etc).
+      - store_artifacts:
+          path: test-results/unit
+
   build:
     executor: docker-publisher
     steps:
@@ -50,6 +131,40 @@ jobs:
           paths:
             - ./image.tar
 
+  set_pkg_number_release:
+    working_directory: ~/application
+    docker:
+      - image: circleci/node:12.3.1
+
+    steps:
+      - checkout
+
+      - run:
+          name: Bump package version [release]
+          command: |
+            git config user.name "CircleCI bot"
+            git config user.email "circleci@circleci"
+            npm version minor -m "Bumped version number to %s [ci skip]"
+            git push origin HEAD:master
+            git push --tags
+
+  set_pkg_number_beta:
+    working_directory: ~/application
+    docker:
+      - image: circleci/node:12.3.1
+
+    steps:
+      - checkout
+
+      - run:
+          name: Bump package version [beta]
+          command: |
+            git config user.name "CircleCI bot"
+            git config user.email "circleci@circleci"
+            npm version prerelease --preid=beta -m "Bumped version number to %s [ci skip]"
+            git push origin HEAD:develop
+            git push --tags
+
 workflows:
   version: 2
   build-master:
@@ -57,4 +172,39 @@ workflows:
       - build:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - develop
+                - /feature.*/
+      - unit:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - /feature.*/
+      - lint:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - /feature.*/
+      - set_pkg_number_release:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - lint
+            - unit
+            - build
+      - set_pkg_number_beta:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - lint
+            - unit
+            - build
