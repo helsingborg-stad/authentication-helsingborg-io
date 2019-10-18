@@ -199,12 +199,4 @@ workflows:
             - lint
             - unit
             - build
-      - set_pkg_number_beta:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - lint
-            - unit
-            - build
+
