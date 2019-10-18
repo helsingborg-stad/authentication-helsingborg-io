@@ -13,25 +13,12 @@ describe('BankId', () => {
     server.close();
   });
 
-  it('should return json on /bankid/auth POST', async () => chai
-    .request(server)
-    .post(`${API_BASE}/bankid/auth`)
-    .send({
-      endUserIp: '194.168.2.25',
-      personalNumber: '190000000000',
-    })
-    .then((res) => {
-      res.should.have.status(200);
-      res.should.be.json;
-      should.exist(res.body);
-    }));
-
-  it('should return 422 on /bankid/auth POST without endUserIp', async () => chai
+  it('should return 400 on /bankid/auth POST without endUserIp', async () => chai
     .request(server)
     .post(`${API_BASE}/bankid/auth`)
     .send()
     .then((res) => {
-      res.body.should.have.status(400);
+      res.should.have.status(400);
       res.should.be.json;
       should.exist(res.body);
       should.exist(res.error);
@@ -58,7 +45,7 @@ describe('BankId', () => {
       userVisibleData: 'IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=',
     })
     .then((res) => {
-      res.body.should.have.status(400);
+      res.should.have.status(400);
       res.should.be.json;
       should.exist(res.body);
       should.exist(res.error);

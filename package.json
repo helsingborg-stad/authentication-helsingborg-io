@@ -8,11 +8,11 @@
     "description": "Endpoint for direct communication with the Bankid api.",
     "main": "server.js",
     "scripts": {
-        "start": "NODE_ENV=production node -r dotenv/config src/server.js",
-        "dev": "nodemon -r dotenv/config src/server.js",
-        "test": "NODE_ENV=test ./node_modules/.bin/mocha src/components/**/*.test.js",
-        "test:watch": "./node_modules/.bin/mocha src/components/**/*.test.js --watch",
-        "lint": "./node_modules/eslint/bin/eslint.js src/** --debug"
+        "start": "NODE_ENV=production node src/server.js",
+        "dev": "nodemon -r dotenv/config src/server.js | ./node_modules/.bin/pino-colada",
+        "test": "NODE_ENV=test nyc ./node_modules/.bin/mocha src/components/**/*.test.js",
+        "test:watch": "NODE_ENV=test nyc ./node_modules/.bin/mocha src/components/**/*.test.js --watch",
+        "lint": "./node_modules/.bin/eslint src/**/*.js"
     },
     "author": "HiQ",
     "license": "MIT",
@@ -39,9 +39,8 @@
         "express-pino-logger": "^4.0.0",
         "fs": "0.0.1-security",
         "json-api-serializer": "^2.1.0",
-        "knex": "^0.17.1",
         "mysql": "^2.17.1",
-        "newrelic": "^5.11.0",
+        "nyc": "^14.1.1",
         "pino": "^5.12.5",
         "redis": "^2.8.0",
         "soap": "^0.27.1",
