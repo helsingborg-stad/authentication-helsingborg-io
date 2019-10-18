@@ -9,7 +9,7 @@ const { BadRequestError } = require('../../utils/error');
 const BANKID_CA = process.env.BANKID_CA_STRING;
 const { BANKID_API_URL } = process.env;
 const { BANKID_PASSPHRASE } = process.env;
-const BANKID_PFX_BASE64 = new Buffer(process.env.BANKID_PFX_BASE64, 'base64'); // Stored as an base64 converted env variable.
+const BANKID_PFX_BASE64 = Buffer.from(process.env.BANKID_PFX_BASE64, 'base64'); // Stored as an base64 converted env variable.
 
 const client = axios.create({
   httpsAgent: new https.Agent({
