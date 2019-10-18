@@ -11,7 +11,7 @@ const logger = require('./utils/logger');
 
 
 // Config
-const SERVER_PORT = process.env.PORT;
+const { PORT } = process.env;
 const API_BASE = '/api/v1';
 
 
@@ -32,7 +32,7 @@ app.use(API_BASE, routes());
 app.use(`${API_BASE}/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Start
-const server = app.listen(SERVER_PORT, () => logger.info(`Bank api listening on port ${SERVER_PORT}!`));
+const server = app.listen(PORT, () => logger.info(`Bank api listening on port ${PORT}!`));
 
 // Export server to use it in tests.
 module.exports = server;
