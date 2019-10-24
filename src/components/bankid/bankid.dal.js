@@ -23,6 +23,27 @@ const client = axios.create({
   },
   timeout: 5000,
 });
+
+/**
+ * Do auth request again if order is already in progress
+ * @param {obj} err
+ */
+const retryFailedRequest = (err) => {
+  if (
+    typeof err.response.status !== 'undefined'
+    && err.response.status === 400
+    && typeof err.response.data.errorCode !== 'undefined'
+    && err.response.data.errorCode === 'alreadyInProgress'
+    && err.config
+    && !err.config.isRetryRequest) {
+    err.config.isRetryRequest = true;
+    return client(err.config);
+  }
+  throw err;
+};
+
+client.interceptors.response.use(undefined, retryFailedRequest);
+
 // Wrapper for all calls to bankId
 const call = (path, payload) => client.post(BANKID_API_URL + path, payload)
   .then(response => (response.status === 200
